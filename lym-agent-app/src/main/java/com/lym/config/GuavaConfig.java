@@ -16,5 +16,4 @@ public class GuavaConfig {
                 .expireAfterWrite(3, TimeUnit.SECONDS)
                 .build();
     }
-
 }

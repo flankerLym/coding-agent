@@ -1,1 +1,1 @@
-docker stop lym-agent
+docker stop ai-agent-station-study
