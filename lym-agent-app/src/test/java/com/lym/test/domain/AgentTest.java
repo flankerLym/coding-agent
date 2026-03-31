@@ -9,6 +9,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -68,7 +69,7 @@ public class AgentTest {
         Prompt prompt = Prompt.builder()
                 .messages(new UserMessage(
                         """
-                                你能调用哪些工具
+                                告诉我你现在能看到的文件目录有哪些文件，输出这些文件的名字
                                 """))
                 .build();
 
@@ -97,5 +98,30 @@ public class AgentTest {
             }
         }
         log.info("=====================================");
+    }
+
+    @Test
+    public void test_aiClient() throws Exception {
+        StrategyHandler<ArmoryCommandEntity, DefaultArmoryStrategyFactory.DynamicContext, String> armoryStrategyHandler =
+                defaultArmoryStrategyFactory.armoryStrategyHandler();
+
+        String apply = armoryStrategyHandler.apply(
+                ArmoryCommandEntity.builder()
+                        .commandType(AiAgentEnumVO.AI_CLIENT.getCode())
+                        .commandIdList(Arrays.asList("3001"))
+                        .build(),
+                new DefaultArmoryStrategyFactory.DynamicContext());
+
+        ChatClient chatClient = (ChatClient) applicationContext.getBean(AiAgentEnumVO.AI_CLIENT.getBeanName("3001"));
+        log.info("客户端构建:{}", chatClient);
+
+        String content = chatClient.prompt(Prompt.builder()
+                .messages(new UserMessage(
+                        """
+                                有哪些工具可以使用
+                                """))
+                .build()).call().content();
+
+        log.info("测试结果(call):{}", content);
     }
 }
