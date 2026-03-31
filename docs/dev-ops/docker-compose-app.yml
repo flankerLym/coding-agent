@@ -1,13 +1,27 @@
-# /usr/local/bin/docker-compose -f /docs/dev-ops/environment/environment-docker-compose-2.4.yml up -d
 version: '3.8'
-# docker-compose -f docker-compose-app.yml up -d
-# 你需要修改system为你自身系统的仓库名
+
 name: ai-agent
+
 services:
-  # MCP 服务，CSDN 发帖，注意 CSDN_API_COOKIE 修改为你的。
+  fetcher-mcp:
+    image: ghcr.io/jae-jae/fetcher-mcp:latest
+    container_name: fetcher-mcp
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - /tmp:/tmp
+    healthcheck:
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:3000" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - my-network
+
   mcp-server-csdn-app:
-    # 课程代码：https://gitcode.net/KnowledgePlanet/mcp-server-csdn
-    #    image: fuzhengwei/mcp-server-csdn-app:1.1
     image: registry.cn-hangzhou.aliyuncs.com/fuzhengwei/mcp-server-csdn-app:1.1
     container_name: mcp-server-csdn-app
     restart: always
@@ -18,8 +32,8 @@ services:
     environment:
       - TZ=PRC
       - SERVER_PORT=8101
-      - CSDN_API_CATEGORIES=Java场景面试宝典
-      - CSDN_API_COOKIE=uuid_tt_dd=10_37460597350-1744844879196-503换成你的cookie
+      - CSDN_API_CATEGORIES=Java
+      - CSDN_API_COOKIE=uuid_tt_dd=10_30290024670-1766903047254-493402
     logging:
       driver: "json-file"
       options:
@@ -27,34 +41,20 @@ services:
         max-file: "3"
     networks:
       - my-network
-
-  # 课程代码：https://gitcode.net/KnowledgePlanet/mcp-server-weixin
-  # MCP 服务，微信公众号通知，注意 environment 下的微信配置修改为你的 https://mp.weixin.qq.com/debug/cgi-bin/sandboxinfo?action=showinfo&t=sandbox/index
-  mcp-server-weixin-app:
-    #    image: fuzhengwei/mcp-server-weixin-app:1.1
-    image: registry.cn-hangzhou.aliyuncs.com/fuzhengwei/mcp-server-weixin-app:1.1
-    container_name: mcp-server-weixin-app
-    restart: always
-    ports:
-      - "8102:8102"
+  xiaohongshu-mcp:
+    image: xpzouying/xiaohongshu-mcp
+    container_name: xiaohongshu-mcp
+    restart: unless-stopped
+    init: true
+    tty: true
     volumes:
-      - ./log:/data/log
+      - ./data:/app/data
+      - ./images:/app/images
     environment:
-      - TZ=PRC
-      - SERVER_PORT=8102
-      - WEIXIN_API_ORIGINAL_ID=gh_e067c267e056
-      - WEIXIN_API_APP_ID=wx5a228ff69e28a91f
-      - WEIXIN_API_APP_SECRET=0bea03aa1310bac050aae79dd8703928
-      - WEIXIN_API_TEMPLATE_ID=O8qI6gy75F-bXfPiQugInTMLA0MRzaMff9WSBb16cFk
-      - WEIXIN_API_TOUSER=or0Ab6ivwmypESVp_bYuk92T6SvU
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    networks:
-      - my-network
-
+      - ROD_BROWSER_BIN=/usr/bin/google-chrome
+      - COOKIES_PATH=/app/data/cookies.json
+    ports:
+      - "18060:18060"
 networks:
   my-network:
     driver: bridge
