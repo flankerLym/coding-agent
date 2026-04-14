@@ -1,6 +1,6 @@
 package com.lym.domain.agent.model.entity;
 
-import com.lym.domain.agent.model.valobj.AiAgentEnumVO;
+import com.lym.domain.agent.model.valobj.enums.AiAgentEnumVO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
