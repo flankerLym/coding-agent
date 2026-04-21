@@ -27,6 +27,7 @@
             <artifactId>commons-lang3</artifactId>
         </dependency>
 
+
         <!-- 系统模块 -->
         <dependency>
             <groupId>com.lym</groupId>
@@ -40,6 +41,11 @@
             <groupId>com.lym</groupId>
             <artifactId>lym-agent-domain</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.lym</groupId>
+            <artifactId>lym-agent-infrastructure</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

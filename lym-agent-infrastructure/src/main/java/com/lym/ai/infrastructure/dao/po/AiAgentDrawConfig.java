@@ -7,16 +7,11 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-/**
- * AI智能体配置表
- * @author bugstack虫洞栈
- * @description AI智能体配置表 PO 对象
- */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AiAgent {
+public class AiAgentDrawConfig {
 
     /**
      * 主键ID
@@ -24,34 +19,49 @@ public class AiAgent {
     private Long id;
 
     /**
-     * 智能体ID
+     * 配置ID（唯一标识）
      */
-    private String agentId;
+    private String configId;
 
     /**
-     * 智能体名称
+     * 配置名称
      */
-    private String agentName;
+    private String configName;
 
     /**
-     * 描述
+     * 配置描述
      */
     private String description;
 
     /**
-     * 渠道类型(agent，chat_stream)
+     * 关联的智能体ID（来自ai_agent表）
      */
-    private String channel;
+    private String agentId;
 
     /**
-     * 执行策略(auto、flow)
+     * 完整的拖拉拽配置JSON数据（包含nodes和edges）
      */
-    private String strategy;
+    private String configData;
+
+    /**
+     * 配置版本号
+     */
+    private Integer version;
 
     /**
      * 状态(0:禁用,1:启用)
      */
     private Integer status;
+
+    /**
+     * 创建人
+     */
+    private String createBy;
+
+    /**
+     * 更新人
+     */
+    private String updateBy;
 
     /**
      * 创建时间

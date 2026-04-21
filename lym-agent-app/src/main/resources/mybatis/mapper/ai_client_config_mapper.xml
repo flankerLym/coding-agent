@@ -18,30 +18,30 @@
         INSERT INTO ai_client_config (
             source_type, source_id, target_type, target_id, ext_param, status, create_time, update_time
         ) VALUES (
-            #{sourceType}, #{sourceId}, #{targetType}, #{targetId}, #{extParam}, #{status}, #{createTime}, #{updateTime}
-        )
+                     #{sourceType}, #{sourceId}, #{targetType}, #{targetId}, #{extParam}, #{status}, #{createTime}, #{updateTime}
+                 )
     </insert>
 
     <update id="updateById" parameterType="com.lym.ai.infrastructure.dao.po.AiClientConfig">
         UPDATE ai_client_config SET
-            source_type = #{sourceType},
-            source_id = #{sourceId},
-            target_type = #{targetType},
-            target_id = #{targetId},
-            ext_param = #{extParam},
-            status = #{status},
-            update_time = #{updateTime}
+                                    source_type = #{sourceType},
+                                    source_id = #{sourceId},
+                                    target_type = #{targetType},
+                                    target_id = #{targetId},
+                                    ext_param = #{extParam},
+                                    status = #{status},
+                                    update_time = #{updateTime}
         WHERE id = #{id}
     </update>
 
     <update id="updateBySourceId" parameterType="com.lym.ai.infrastructure.dao.po.AiClientConfig">
         UPDATE ai_client_config SET
-            source_type = #{sourceType},
-            target_type = #{targetType},
-            target_id = #{targetId},
-            ext_param = #{extParam},
-            status = #{status},
-            update_time = #{updateTime}
+                                    source_type = #{sourceType},
+                                    target_type = #{targetType},
+                                    target_id = #{targetId},
+                                    ext_param = #{extParam},
+                                    status = #{status},
+                                    update_time = #{updateTime}
         WHERE source_id = #{sourceId}
     </update>
 
@@ -81,6 +81,15 @@
         SELECT id, source_type, source_id, target_type, target_id, ext_param, status, create_time, update_time
         FROM ai_client_config
         WHERE target_type = #{targetType} AND target_id = #{targetId}
+    </select>
+
+    <select id="queryByConditions" resultMap="AiClientConfigMap">
+        SELECT id, source_type, source_id, target_type, target_id, ext_param, status, create_time, update_time
+        FROM ai_client_config
+        WHERE source_type = #{sourceType}
+          AND source_id = #{sourceId}
+          AND target_type = #{targetType}
+          AND target_id = #{targetId}
     </select>
 
     <select id="queryEnabledConfigs" resultMap="AiClientConfigMap">

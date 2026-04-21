@@ -1,22 +1,28 @@
-package com.lym.ai.infrastructure.dao.po;
+package com.lym.api.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * AI智能体配置表
+ * MCP客户端配置响应 DTO
+ *
  * @author bugstack虫洞栈
- * @description AI智能体配置表 PO 对象
+ * @description MCP客户端配置响应数据传输对象
  */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AiAgent {
+public class AiClientToolMcpResponseDTO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * 主键ID
@@ -24,29 +30,29 @@ public class AiAgent {
     private Long id;
 
     /**
-     * 智能体ID
+     * MCP ID
      */
-    private String agentId;
+    private String mcpId;
 
     /**
-     * 智能体名称
+     * MCP名称
      */
-    private String agentName;
+    private String mcpName;
 
     /**
-     * 描述
+     * 传输类型(sse/stdio)
      */
-    private String description;
+    private String transportType;
 
     /**
-     * 渠道类型(agent，chat_stream)
+     * 传输配置(sse/stdio)
      */
-    private String channel;
+    private String transportConfig;
 
     /**
-     * 执行策略(auto、flow)
+     * 请求超时时间(分钟)
      */
-    private String strategy;
+    private Integer requestTimeout;
 
     /**
      * 状态(0:禁用,1:启用)

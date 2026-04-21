@@ -8,15 +8,15 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * AI智能体配置表
+ * AI智能体拖拉拽配置历史表
  * @author bugstack虫洞栈
- * @description AI智能体配置表 PO 对象
+ * @description AI智能体拖拉拽配置历史表 PO 对象
  */
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AiAgent {
+public class AiAgentDrawHistory {
 
     /**
      * 主键ID
@@ -24,43 +24,38 @@ public class AiAgent {
     private Long id;
 
     /**
-     * 智能体ID
+     * 配置ID（关联ai_agent_draw_config）
      */
-    private String agentId;
+    private String configId;
 
     /**
-     * 智能体名称
+     * 版本号
      */
-    private String agentName;
+    private Integer version;
 
     /**
-     * 描述
+     * 历史配置JSON数据
      */
-    private String description;
+    private String configData;
 
     /**
-     * 渠道类型(agent，chat_stream)
+     * 变更类型（create、update、delete）
      */
-    private String channel;
+    private String changeType;
 
     /**
-     * 执行策略(auto、flow)
+     * 变更描述
      */
-    private String strategy;
+    private String changeDesc;
 
     /**
-     * 状态(0:禁用,1:启用)
+     * 变更人
      */
-    private Integer status;
+    private String changeBy;
 
     /**
      * 创建时间
      */
     private LocalDateTime createTime;
-
-    /**
-     * 更新时间
-     */
-    private LocalDateTime updateTime;
 
 }
