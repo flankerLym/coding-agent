@@ -13,6 +13,7 @@ import java.util.Map;
  */
 public interface IAgentRepository {
 
+
     List<AiClientApiVO> queryAiClientApiVOListByClientIds(List<String> clientIdList);
 
     List<AiClientModelVO> AiClientModelVOByClientIds(List<String> clientIdList);
@@ -34,4 +35,25 @@ public interface IAgentRepository {
     Map<String, AiAgentClientFlowConfigVO> queryAiAgentClientFlowConfig(String aiAgentId);
 
     AiAgentVO queryAiAgentByAgentId(String aiAgentId);
+
+/**
+ * 根据AI代理ID查询相关的AI客户端流程配置信息
+ *
+ * @param aiAgentId AI代理ID，用于标识特定的AI代理
+ * @return 返回一个AiAgentClientFlowConfigVO对象的列表，包含与指定AI代理ID相关的所有客户端流程配置信息
+ */
+    List<AiAgentClientFlowConfigVO> queryAiAgentClientsByAgentId(String aiAgentId);
+
+    List<AiAgentTaskScheduleVO> queryAllValidTaskSchedule();
+
+    List<Long> queryAllInvalidTaskScheduleIds();
+
+    void createTagOrder(AiRagOrderVO aiRagOrderVO);
+
+    /**
+     * 查询可用的智能体列表
+     * @return 可用的智能体列表
+     */
+    List<AiAgentVO> queryAvailableAgents();
+
 }

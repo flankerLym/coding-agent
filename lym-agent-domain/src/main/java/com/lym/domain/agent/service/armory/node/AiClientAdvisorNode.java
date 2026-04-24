@@ -1,12 +1,12 @@
-package com.lym.domain.agent.service.armory;
+package com.lym.domain.agent.service.armory.node;
 
-import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
-import com.alibaba.fastjson.JSON;
 import com.lym.domain.agent.model.entity.ArmoryCommandEntity;
 import com.lym.domain.agent.model.valobj.enums.AiAgentEnumVO;
 import com.lym.domain.agent.model.valobj.enums.AiClientAdvisorTypeEnumVO;
 import com.lym.domain.agent.model.valobj.AiClientAdvisorVO;
-import com.lym.domain.agent.service.armory.factory.DefaultArmoryStrategyFactory;
+import com.lym.domain.agent.service.armory.node.factory.DefaultArmoryStrategyFactory;
+import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
+import com.alibaba.fastjson.JSON;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
@@ -15,6 +15,12 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * 顾问角色节点
+ *
+ * @author xiaofuge bugstack.cn @小傅哥
+ * 2025/7/19 08:51
+ */
 @Slf4j
 @Service
 public class AiClientAdvisorNode extends AbstractArmorySupport {

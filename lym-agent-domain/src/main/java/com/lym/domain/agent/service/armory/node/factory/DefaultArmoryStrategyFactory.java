@@ -1,8 +1,8 @@
-package com.lym.domain.agent.service.armory.factory;
+package com.lym.domain.agent.service.armory.node.factory;
 
-import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.lym.domain.agent.model.entity.ArmoryCommandEntity;
-import com.lym.domain.agent.service.armory.RootNode;
+import com.lym.domain.agent.service.armory.node.RootNode;
+import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -47,6 +47,5 @@ public class DefaultArmoryStrategyFactory {
             return (T) dataObjects.get(key);
         }
     }
-
 
 }

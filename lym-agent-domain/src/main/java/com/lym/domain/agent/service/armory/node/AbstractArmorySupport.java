@@ -1,8 +1,8 @@
-package com.lym.domain.agent.service.armory;
+package com.lym.domain.agent.service.armory.node;
 
 import com.lym.domain.agent.adapter.repository.IAgentRepository;
 import com.lym.domain.agent.model.entity.ArmoryCommandEntity;
-import com.lym.domain.agent.service.armory.factory.DefaultArmoryStrategyFactory;
+import com.lym.domain.agent.service.armory.node.factory.DefaultArmoryStrategyFactory;
 import cn.bugstack.wrench.design.framework.tree.AbstractMultiThreadStrategyRouter;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
@@ -77,6 +77,5 @@ public abstract class AbstractArmorySupport extends AbstractMultiThreadStrategyR
     protected <T> T getBean(String beanName) {
         return (T) applicationContext.getBean(beanName);
     }
-
 
 }

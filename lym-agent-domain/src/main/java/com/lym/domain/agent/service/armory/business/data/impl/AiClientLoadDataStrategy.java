@@ -5,12 +5,13 @@ import com.lym.domain.agent.model.entity.ArmoryCommandEntity;
 import com.lym.domain.agent.model.valobj.*;
 import com.lym.domain.agent.model.valobj.enums.AiAgentEnumVO;
 import com.lym.domain.agent.service.armory.business.data.ILoadDataStrategy;
-import com.lym.domain.agent.service.armory.factory.DefaultArmoryStrategyFactory;
+import com.lym.domain.agent.service.armory.node.factory.DefaultArmoryStrategyFactory;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -49,9 +50,9 @@ public class AiClientLoadDataStrategy implements ILoadDataStrategy {
             return repository.AiClientToolMcpVOByClientIds(clientIdList);
         }, threadPoolExecutor);
 
-        CompletableFuture<List<AiClientSystemPromptVO>> aiClientSystemPromptListFuture = CompletableFuture.supplyAsync(() -> {
+        CompletableFuture<Map<String, AiClientSystemPromptVO>> aiClientSystemPromptListFuture = CompletableFuture.supplyAsync(() -> {
             log.info("查询配置数据(ai_client_system_prompt) {}", clientIdList);
-            return repository.AiClientSystemPromptVOByClientIds(clientIdList);
+            return repository.queryAiClientSystemPromptMapByClientIds(clientIdList);
         }, threadPoolExecutor);
 
         CompletableFuture<List<AiClientAdvisorVO>> aiClientAdvisorListFuture = CompletableFuture.supplyAsync(() -> {
@@ -67,12 +68,13 @@ public class AiClientLoadDataStrategy implements ILoadDataStrategy {
         CompletableFuture.allOf(aiClientApiListFuture).thenRun(() -> {
             dynamicContext.setValue(AiAgentEnumVO.AI_CLIENT_API.getDataName(), aiClientApiListFuture.join());
             dynamicContext.setValue(AiAgentEnumVO.AI_CLIENT_MODEL.getDataName(), aiClientModelListFuture.join());
-            dynamicContext.setValue(AiAgentEnumVO.AI_CLIENT_TOOL_MCP.getDataName(), aiClientToolMcpListFuture.join());
             dynamicContext.setValue(AiAgentEnumVO.AI_CLIENT_SYSTEM_PROMPT.getDataName(), aiClientSystemPromptListFuture.join());
+            dynamicContext.setValue(AiAgentEnumVO.AI_CLIENT_TOOL_MCP.getDataName(), aiClientToolMcpListFuture.join());
             dynamicContext.setValue(AiAgentEnumVO.AI_CLIENT_ADVISOR.getDataName(), aiClientAdvisorListFuture.join());
             dynamicContext.setValue(AiAgentEnumVO.AI_CLIENT.getDataName(), aiClientListFuture.join());
 
         }).join();
+
     }
 
 }

@@ -1,24 +1,30 @@
-package com.lym.domain.agent.service.armory;
+package com.lym.domain.agent.service.armory.node;
 
-import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
-import com.alibaba.fastjson.JSON;
 import com.lym.domain.agent.model.entity.ArmoryCommandEntity;
 import com.lym.domain.agent.model.valobj.enums.AiAgentEnumVO;
 import com.lym.domain.agent.model.valobj.AiClientSystemPromptVO;
 import com.lym.domain.agent.model.valobj.AiClientVO;
-import com.lym.domain.agent.service.armory.factory.DefaultArmoryStrategyFactory;
+import com.lym.domain.agent.service.armory.node.factory.DefaultArmoryStrategyFactory;
+import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
+import com.alibaba.fastjson.JSON;
 import io.modelcontextprotocol.client.McpSyncClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
-import org.springframework.ai.zhipuai.ZhiPuAiChatModel;
+import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * ai agent 客户端对话对象节点
+ *
+ * @author xiaofuge bugstack.cn @小傅哥
+ * 2025/7/19 09:17
+ */
 @Slf4j
 @Service
 public class AiClientNode extends AbstractArmorySupport {
@@ -33,14 +39,7 @@ public class AiClientNode extends AbstractArmorySupport {
             return router(requestParameter, dynamicContext);
         }
 
-        List<AiClientSystemPromptVO> systemPromptList = dynamicContext.getValue(AiAgentEnumVO.AI_CLIENT_SYSTEM_PROMPT.getDataName());
-
-        Map<String, AiClientSystemPromptVO> systemPromptMap = systemPromptList.stream()
-                .collect(java.util.stream.Collectors.toMap(
-                        AiClientSystemPromptVO::getPromptId,  // Map的key：promptId
-                        vo -> vo,                             // Map的value：VO对象
-                        (oldValue, newValue) -> oldValue      // 重复key冲突处理
-                ));
+        Map<String, AiClientSystemPromptVO> systemPromptMap = dynamicContext.getValue(AiAgentEnumVO.AI_CLIENT_SYSTEM_PROMPT.getDataName());
 
         for (AiClientVO aiClientVO : aiClientList) {
             // 1. 预设话术
@@ -52,7 +51,7 @@ public class AiClientNode extends AbstractArmorySupport {
             }
 
             // 2. 对话模型
-            ZhiPuAiChatModel chatModel = getBean(aiClientVO.getModelBeanName());
+            OpenAiChatModel chatModel = getBean(aiClientVO.getModelBeanName());
 
             // 3. MCP 服务
             List<McpSyncClient> mcpSyncClients = new ArrayList<>();

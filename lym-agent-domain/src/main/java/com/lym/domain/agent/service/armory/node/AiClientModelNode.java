@@ -1,27 +1,32 @@
-package com.lym.domain.agent.service.armory;
+package com.lym.domain.agent.service.armory.node;
 
-import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
-import com.alibaba.fastjson.JSON;
 import com.lym.domain.agent.model.entity.ArmoryCommandEntity;
 import com.lym.domain.agent.model.valobj.enums.AiAgentEnumVO;
 import com.lym.domain.agent.model.valobj.AiClientModelVO;
-import com.lym.domain.agent.service.armory.factory.DefaultArmoryStrategyFactory;
+import com.lym.domain.agent.service.armory.node.factory.DefaultArmoryStrategyFactory;
+import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
+import com.alibaba.fastjson.JSON;
 import io.modelcontextprotocol.client.McpSyncClient;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
-import org.springframework.ai.zhipuai.ZhiPuAiChatModel;
-import org.springframework.ai.zhipuai.ZhiPuAiChatOptions;
-import org.springframework.ai.zhipuai.api.ZhiPuAiApi;
+import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * 对话模型节点配置
+ *
+ * @author xiaofuge bugstack.cn @小傅哥
+ * 2025/7/5 12:43
+ */
 @Slf4j
 @Service
 public class AiClientModelNode extends AbstractArmorySupport {
-
 
     @Resource
     private AiClientAdvisorNode aiClientAdvisorNode;
@@ -40,8 +45,8 @@ public class AiClientModelNode extends AbstractArmorySupport {
         for (AiClientModelVO modelVO : aiClientModelList) {
 
             // 获取当前模型关联的 API Bean 对象
-            ZhiPuAiApi zhiPuAiApi = getBean(AiAgentEnumVO.AI_CLIENT_API.getBeanName(modelVO.getApiId()));
-            if (null == zhiPuAiApi) {
+            OpenAiApi openAiApi = getBean(AiAgentEnumVO.AI_CLIENT_API.getBeanName(modelVO.getApiId()));
+            if (null == openAiApi) {
                 throw new RuntimeException("mode 2 api is null");
             }
 
@@ -53,16 +58,17 @@ public class AiClientModelNode extends AbstractArmorySupport {
             }
 
             // 实例化对话模型（如果有其他模型对接，可以使用 one-api 服务，转换为 openai 模型格式）
-            ZhiPuAiChatModel chatModel = new ZhiPuAiChatModel(zhiPuAiApi,
-                    ZhiPuAiChatOptions.builder()
-                            .model(modelVO.getModelName())
-                            .toolCallbacks(new SyncMcpToolCallbackProvider(mcpSyncClients).getToolCallbacks())
-                            .build()
-            );
+            OpenAiChatModel chatModel = OpenAiChatModel.builder()
+                    .openAiApi(openAiApi)
+                    .defaultOptions(
+                            OpenAiChatOptions.builder()
+                                    .model(modelVO.getModelName())
+                                    .toolCallbacks(new SyncMcpToolCallbackProvider(mcpSyncClients).getToolCallbacks())
+                                    .build())
+                    .build();
 
             // 注册 Bean 对象
-            log.info("注册模型 modelBean: {}", beanName(modelVO.getModelId()));
-            registerBean(beanName(modelVO.getModelId()), ZhiPuAiChatModel.class, chatModel);
+            registerBean(beanName(modelVO.getModelId()), OpenAiChatModel.class, chatModel);
         }
 
         return router(requestParameter, dynamicContext);

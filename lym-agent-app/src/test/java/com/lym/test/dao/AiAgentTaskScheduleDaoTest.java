@@ -28,7 +28,7 @@ public class AiAgentTaskScheduleDaoTest {
     @Test
     public void test_insert() {
         AiAgentTaskSchedule aiAgentTaskSchedule = AiAgentTaskSchedule.builder()
-                .agentId(1L)
+                .agentId(String.valueOf(1L))
                 .taskName("测试任务")
                 .description("这是一个测试任务")
                 .cronExpression("0 0/30 * * * ?")
@@ -46,7 +46,7 @@ public class AiAgentTaskScheduleDaoTest {
     public void test_updateById() {
         AiAgentTaskSchedule aiAgentTaskSchedule = AiAgentTaskSchedule.builder()
                 .id(1L)
-                .agentId(1L)
+                .agentId(String.valueOf(1L))
                 .taskName("更新后的测试任务")
                 .description("这是一个更新后的测试任务")
                 .cronExpression("0 0/15 * * * ?")

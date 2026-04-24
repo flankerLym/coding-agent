@@ -94,10 +94,10 @@ public interface IAiClientConfigDao {
      * @param targetId 目标ID
      * @return AI客户端配置对象列表
      */
-    List<AiClientConfig> queryByConditions(@Param("sourceType") String sourceType,
-                                           @Param("sourceId") String sourceId,
-                                           @Param("targetType") String targetType,
-                                           @Param("targetId") String targetId);
+    List<AiClientConfig> queryByConditions(@Param("sourceType") String sourceType, 
+                                          @Param("sourceId") String sourceId,
+                                          @Param("targetType") String targetType, 
+                                          @Param("targetId") String targetId);
 
     /**
      * 查询启用状态的AI客户端配置

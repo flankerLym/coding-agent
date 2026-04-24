@@ -1,10 +1,17 @@
 package com.lym.trigger.http;
 
 import com.lym.api.IAiAgentService;
+import com.lym.api.dto.AiAgentResponseDTO;
+import com.lym.api.dto.ArmoryAgentRequestDTO;
 import com.lym.api.dto.AutoAgentRequestDTO;
+import com.lym.api.response.Response;
 import com.lym.domain.agent.model.entity.ExecuteCommandEntity;
+import com.lym.domain.agent.model.valobj.AiAgentVO;
 import com.lym.domain.agent.service.IAgentDispatchService;
-import com.lym.domain.agent.service.execute.IExecuteStrategy;
+import com.lym.domain.agent.service.IArmoryService;
+import com.lym.domain.agent.service.armory.node.factory.DefaultArmoryStrategyFactory;
+import com.lym.types.common.Constants;
+import com.lym.types.enums.ResponseCode;
 import com.alibaba.fastjson.JSON;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 
 import javax.annotation.Resource;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * AutoAgent 自动智能对话体
@@ -25,14 +33,11 @@ import java.util.concurrent.ThreadPoolExecutor;
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.OPTIONS})
 public class AiAgentController implements IAiAgentService {
 
-    @Resource(name = "autoAgentExecuteStrategy")
-    private IExecuteStrategy autoAgentExecuteStrategy;
-
     @Resource
     private IAgentDispatchService agentDispatchService;
 
     @Resource
-    private ThreadPoolExecutor threadPoolExecutor;
+    private IArmoryService armoryService;
 
     @RequestMapping(value = "auto_agent", method = RequestMethod.POST)
     public ResponseBodyEmitter autoAgent(@RequestBody AutoAgentRequestDTO request, HttpServletResponse response) {
@@ -56,9 +61,9 @@ public class AiAgentController implements IAiAgentService {
                     .maxStep(request.getMaxStep())
                     .build();
 
-            // 3. 异步执行AutoAgent
+            // 3. 调度处理
             agentDispatchService.dispatch(executeCommandEntity, emitter);
-            
+
             return emitter;
 
         } catch (Exception e) {
@@ -71,6 +76,83 @@ public class AiAgentController implements IAiAgentService {
                 log.error("发送错误信息失败：{}", ex.getMessage(), ex);
             }
             return errorEmitter;
+        }
+    }
+
+    @RequestMapping(value = "armory_agent", method = RequestMethod.POST)
+    @Override
+    public Response<Boolean> armoryAgent(@RequestBody ArmoryAgentRequestDTO request) {
+        log.info("装配智能体请求开始，请求信息：{}", JSON.toJSONString(request));
+
+        try {
+            // 参数校验
+            if (request == null || request.getAgentId() == null || request.getAgentId().trim().isEmpty()) {
+                log.warn("装配智能体请求参数无效：agentId为空");
+                return Response.<Boolean>builder()
+                        .code(ResponseCode.ILLEGAL_PARAMETER.getCode())
+                        .info("agentId不能为空")
+                        .data(false)
+                        .build();
+            }
+            
+            // 调用装配服务
+            armoryService.acceptArmoryAgent(request.getAgentId());
+            
+            log.info("装配智能体成功，agentId：{}", request.getAgentId());
+            return Response.<Boolean>builder()
+                    .code(ResponseCode.SUCCESS.getCode())
+                    .info("装配成功")
+                    .data(true)
+                    .build();
+                    
+        } catch (Exception e) {
+            log.error("装配智能体失败，agentId：{}，错误信息：{}", 
+                    request != null ? request.getAgentId() : "null", e.getMessage(), e);
+            return Response.<Boolean>builder()
+                    .code(ResponseCode.UN_ERROR.getCode())
+                    .info("装配失败：" + e.getMessage())
+                    .data(false)
+                    .build();
+        }
+    }
+
+    @RequestMapping(value = "query_available_agents", method = RequestMethod.GET)
+    @Override
+    public Response<List<AiAgentResponseDTO>> queryAvailableAgents() {
+        log.info("查询可用智能体列表请求开始");
+
+        try {
+            // 调用装配服务查询可用智能体
+            List<AiAgentVO> aiAgentVOList = armoryService.queryAvailableAgents();
+            
+            // 转换为响应DTO
+            List<AiAgentResponseDTO> responseList = new ArrayList<>();
+            for (AiAgentVO aiAgentVO : aiAgentVOList) {
+                AiAgentResponseDTO responseDTO = AiAgentResponseDTO.builder()
+                        .agentId(aiAgentVO.getAgentId())
+                        .agentName(aiAgentVO.getAgentName())
+                        .description(aiAgentVO.getDescription())
+                        .channel(aiAgentVO.getChannel())
+                        .strategy(aiAgentVO.getStrategy())
+                        .status(aiAgentVO.getStatus())
+                        .build();
+                responseList.add(responseDTO);
+            }
+            
+            log.info("查询可用智能体列表成功，共{}个智能体", responseList.size());
+            return Response.<List<AiAgentResponseDTO>>builder()
+                    .code(ResponseCode.SUCCESS.getCode())
+                    .info("查询成功")
+                    .data(responseList)
+                    .build();
+                    
+        } catch (Exception e) {
+            log.error("查询可用智能体列表失败，错误信息：{}", e.getMessage(), e);
+            return Response.<List<AiAgentResponseDTO>>builder()
+                    .code(ResponseCode.UN_ERROR.getCode())
+                    .info("查询失败：" + e.getMessage())
+                    .data(new ArrayList<>())
+                    .build();
         }
     }
 

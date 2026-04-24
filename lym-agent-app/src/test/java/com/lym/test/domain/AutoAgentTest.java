@@ -4,7 +4,8 @@ import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.lym.domain.agent.model.entity.ArmoryCommandEntity;
 import com.lym.domain.agent.model.entity.ExecuteCommandEntity;
 import com.lym.domain.agent.model.valobj.enums.AiAgentEnumVO;
-import com.lym.domain.agent.service.armory.factory.DefaultArmoryStrategyFactory;
+
+import com.lym.domain.agent.service.armory.node.factory.DefaultArmoryStrategyFactory;
 import com.lym.domain.agent.service.execute.auto.step.factory.DefaultAutoAgentExecuteStrategyFactory;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;

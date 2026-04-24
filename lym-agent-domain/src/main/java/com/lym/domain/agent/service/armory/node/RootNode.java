@@ -1,10 +1,10 @@
-package com.lym.domain.agent.service.armory;
+package com.lym.domain.agent.service.armory.node;
 
-import com.alibaba.fastjson.JSON;
 import com.lym.domain.agent.model.entity.ArmoryCommandEntity;
 import com.lym.domain.agent.service.armory.business.data.ILoadDataStrategy;
-import com.lym.domain.agent.service.armory.factory.DefaultArmoryStrategyFactory;
+import com.lym.domain.agent.service.armory.node.factory.DefaultArmoryStrategyFactory;
 import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
+import com.alibaba.fastjson.JSON;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -48,7 +48,5 @@ public class RootNode extends AbstractArmorySupport {
     public StrategyHandler<ArmoryCommandEntity, DefaultArmoryStrategyFactory.DynamicContext, String> get(ArmoryCommandEntity armoryCommandEntity, DefaultArmoryStrategyFactory.DynamicContext dynamicContext) throws Exception {
         return aiClientApiNode;
     }
-
-
 
 }

@@ -1,12 +1,12 @@
 package com.lym.ai.infrastructure.adapter.repository;
 
-import com.alibaba.fastjson.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lym.domain.agent.adapter.repository.IAgentRepository;
 import com.lym.domain.agent.model.valobj.*;
 import com.lym.ai.infrastructure.dao.*;
 import com.lym.ai.infrastructure.dao.po.*;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -519,6 +519,7 @@ public class AgentRepository implements IAgentRepository {
                         .clientName(flowConfig.getClientName())
                         .clientType(flowConfig.getClientType())
                         .sequence(flowConfig.getSequence())
+                        .stepPrompt(flowConfig.getStepPrompt())
                         .build();
 
                 result.put(flowConfig.getClientType(), configVO);
@@ -534,7 +535,6 @@ public class AgentRepository implements IAgentRepository {
         }
     }
 
-
     @Override
     public AiAgentVO queryAiAgentByAgentId(String aiAgentId) {
         AiAgent aiAgent = aiAgentDao.queryByAgentId(aiAgentId);
@@ -547,6 +547,76 @@ public class AgentRepository implements IAgentRepository {
                 .strategy(aiAgent.getStrategy())
                 .status(aiAgent.getStatus())
                 .build();
+    }
+
+    @Override
+    public List<AiAgentClientFlowConfigVO> queryAiAgentClientsByAgentId(String aiAgentId) {
+        List<AiAgentClientFlowConfigVO> aiAgentClientFlowConfigVOS = new ArrayList<>();
+
+        List<AiAgentFlowConfig> flowConfigs = aiAgentFlowConfigDao.queryByAgentId(aiAgentId);
+        for (AiAgentFlowConfig flowConfig : flowConfigs) {
+            AiAgentClientFlowConfigVO configVO = AiAgentClientFlowConfigVO.builder()
+                    .clientId(flowConfig.getClientId())
+                    .clientName(flowConfig.getClientName())
+                    .clientType(flowConfig.getClientType())
+                    .sequence(flowConfig.getSequence())
+                    .stepPrompt(flowConfig.getStepPrompt())
+                    .build();
+
+            aiAgentClientFlowConfigVOS.add(configVO);
+        }
+
+        return aiAgentClientFlowConfigVOS;
+    }
+
+    @Override
+    public List<AiAgentTaskScheduleVO> queryAllValidTaskSchedule() {
+        List<AiAgentTaskSchedule> aiAgentTaskSchedules = aiAgentTaskScheduleDao.queryAllValidTaskSchedule();
+
+        List<AiAgentTaskScheduleVO> result = new ArrayList<>();
+        for (AiAgentTaskSchedule taskSchedule : aiAgentTaskSchedules) {
+            AiAgentTaskScheduleVO taskScheduleVO = AiAgentTaskScheduleVO.builder()
+                    .id(taskSchedule.getId())
+                    .agentId(taskSchedule.getAgentId())
+                    .description(taskSchedule.getDescription())
+                    .cronExpression(taskSchedule.getCronExpression())
+                    .taskParam(taskSchedule.getTaskParam())
+                    .build();
+            result.add(taskScheduleVO);
+        }
+
+        return result;
+    }
+
+    @Override
+    public List<Long> queryAllInvalidTaskScheduleIds() {
+        return aiAgentTaskScheduleDao.queryAllInvalidTaskScheduleIds();
+    }
+
+    @Override
+    public void createTagOrder(AiRagOrderVO aiRagOrderVO) {
+        AiClientRagOrder aiRagOrder = new AiClientRagOrder();
+        aiRagOrder.setRagName(aiRagOrderVO.getRagName());
+        aiRagOrder.setKnowledgeTag(aiRagOrderVO.getKnowledgeTag());
+        aiRagOrder.setStatus(1);
+        aiClientRagOrderDao.insert(aiRagOrder);
+    }
+
+    @Override
+    public List<AiAgentVO> queryAvailableAgents() {
+        List<AiAgent> aiAgents = aiAgentDao.queryEnabledAgents();
+        List<AiAgentVO> aiAgentVOS = new ArrayList<>();
+        for (AiAgent aiAgent : aiAgents) {
+            aiAgentVOS.add(AiAgentVO.builder()
+                    .agentId(aiAgent.getAgentId())
+                    .agentName(aiAgent.getAgentName())
+                    .description(aiAgent.getDescription())
+                    .channel(aiAgent.getChannel())
+                    .strategy(aiAgent.getStrategy())
+                    .status(aiAgent.getStatus())
+                    .build());
+        }
+        return aiAgentVOS;
     }
 
 }

@@ -1,11 +1,11 @@
-package com.lym.domain.agent.service.armory;
+package com.lym.domain.agent.service.armory.node;
 
-import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
-import com.alibaba.fastjson.JSON;
 import com.lym.domain.agent.model.entity.ArmoryCommandEntity;
 import com.lym.domain.agent.model.valobj.enums.AiAgentEnumVO;
 import com.lym.domain.agent.model.valobj.AiClientToolMcpVO;
-import com.lym.domain.agent.service.armory.factory.DefaultArmoryStrategyFactory;
+import com.lym.domain.agent.service.armory.node.factory.DefaultArmoryStrategyFactory;
+import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
+import com.alibaba.fastjson.JSON;
 import io.modelcontextprotocol.client.McpClient;
 import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.client.transport.HttpClientSseClientTransport;
@@ -20,6 +20,12 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * MCP客户端配置节点
+ *
+ * @author xiaofuge bugstack.cn @小傅哥
+ * 2025/7/5 12:48
+ */
 @Slf4j
 @Service
 public class AiClientToolMcpNode extends AbstractArmorySupport {
@@ -43,7 +49,6 @@ public class AiClientToolMcpNode extends AbstractArmorySupport {
             McpSyncClient mcpSyncClient = createMcpSyncClient(mcpVO);
 
             // 注册 MCP 对象
-            log.info("注册模型 mcpBean: {}", beanName(mcpVO.getMcpId()));
             registerBean(beanName(mcpVO.getMcpId()), McpSyncClient.class, mcpSyncClient);
         }
 
