@@ -41,6 +41,18 @@ spring:
         minimum-idle: 2
         idle-timeout: 30000
         connection-timeout: 30000
+    neo4j:
+      uri: bolt://175.178.182.172:7687
+      authentication:
+        username: neo4j
+        password: 140810921
+      pool:
+        max-connection-pool-size: 30
+        connection-acquisition-timeout: 10s
+        max-connection-lifetime: 30m
+        idle-time-before-connection-test: 30s
+        log-leaked-sessions: true
+        metrics-enabled: true
   ai:
     zhipuai:
       api-key: ee47e5200a65463181b692571a4da7f8.dRETn3mDdI1voRD3
