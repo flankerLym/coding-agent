@@ -12,6 +12,7 @@ import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -30,6 +31,9 @@ public class AiClientModelNode extends AbstractArmorySupport {
 
     @Resource
     private AiClientAdvisorNode aiClientAdvisorNode;
+
+    @Value("${spring.ai.agent.auto-config.fixed-mcp}")
+    private boolean fixedMcp;
 
     @Override
     protected String doApply(ArmoryCommandEntity requestParameter, DefaultArmoryStrategyFactory.DynamicContext dynamicContext) throws Exception {
@@ -52,11 +56,12 @@ public class AiClientModelNode extends AbstractArmorySupport {
 
             // 获取当前模型关联的 Tool MCP Bean 对象
             List<McpSyncClient> mcpSyncClients = new ArrayList<>();
-            for (String toolMcpId : modelVO.getToolMcpIds()) {
-                McpSyncClient mcpSyncClient = getBean(AiAgentEnumVO.AI_CLIENT_TOOL_MCP.getBeanName(toolMcpId));
-                mcpSyncClients.add(mcpSyncClient);
+            if (fixedMcp) {
+                for (String toolMcpId : modelVO.getToolMcpIds()) {
+                    McpSyncClient mcpSyncClient = getBean(AiAgentEnumVO.AI_CLIENT_TOOL_MCP.getBeanName(toolMcpId));
+                    mcpSyncClients.add(mcpSyncClient);
+                }
             }
-
             // 实例化对话模型（如果有其他模型对接，可以使用 one-api 服务，转换为 openai 模型格式）
             OpenAiChatModel chatModel = OpenAiChatModel.builder()
                     .openAiApi(openAiApi)

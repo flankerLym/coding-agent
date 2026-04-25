@@ -124,6 +124,37 @@ services:
     networks:
       - my-network
 
+  neo4j:
+    image: neo4j:5.26-community
+    container_name: neo4j
+    hostname: neo4j
+    restart: always
+    environment:
+      TZ: Asia/Shanghai
+      NEO4J_AUTH: neo4j/140810921
+      NEO4J_server_memory_heap_initial__size: 512m
+      NEO4J_server_memory_heap_max__size: 1G
+      NEO4J_server_memory_pagecache_size: 512m
+      NEO4J_server_default__listen__address: 0.0.0.0
+      NEO4J_server_bolt_listen__address: 0.0.0.0:7687
+      NEO4J_server_http_listen__address: 0.0.0.0:7474
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - ./neo4j/data:/data
+      - ./neo4j/logs:/logs
+      - ./neo4j/import:/var/lib/neo4j/import
+      - ./neo4j/plugins:/plugins
+    healthcheck:
+      test: [ "CMD-SHELL", "cypher-shell -u neo4j -p 140810921 'RETURN 1;' || exit 1" ]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    networks:
+      - my-network
+
 networks:
   my-network:
     driver: bridge

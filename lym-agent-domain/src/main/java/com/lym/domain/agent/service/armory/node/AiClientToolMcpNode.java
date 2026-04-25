@@ -14,6 +14,7 @@ import io.modelcontextprotocol.client.transport.StdioClientTransport;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -33,13 +34,16 @@ public class AiClientToolMcpNode extends AbstractArmorySupport {
     @Resource
     private AiClientModelNode aiClientModelNode;
 
+    @Value("${spring.ai.agent.auto-config.fixed-mcp}")
+    private boolean fixedMcp;
+
     @Override
     protected String doApply(ArmoryCommandEntity requestParameter, DefaultArmoryStrategyFactory.DynamicContext dynamicContext) throws Exception {
         log.info("Ai Agent 构建节点，Tool MCP 工具配置{}", JSON.toJSONString(requestParameter));
 
         List<AiClientToolMcpVO> aiClientToolMcpList = dynamicContext.getValue(dataName());
 
-        if (aiClientToolMcpList == null || aiClientToolMcpList.isEmpty()) {
+        if (aiClientToolMcpList == null || aiClientToolMcpList.isEmpty()|| false==fixedMcp) {
             log.warn("没有需要被初始化的 ai client tool mcp");
             return router(requestParameter, dynamicContext);
         }

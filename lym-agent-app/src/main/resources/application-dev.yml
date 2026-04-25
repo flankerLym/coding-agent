@@ -51,6 +51,7 @@ spring:
       auto-config:
         enabled: true
         client-ids: 3101,3102,3103,3104
+        fixed-mcp: false
     model:
       chat: none
       embedding: zhipuai
