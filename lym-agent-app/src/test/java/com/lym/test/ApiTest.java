@@ -12,9 +12,6 @@ import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-@Slf4j
-@RunWith(SpringRunner.class)
-@SpringBootTest
 public class ApiTest {
 
     private OpenAiChatModel openAiChatModel;
@@ -22,7 +19,7 @@ public class ApiTest {
     @Test
     public void test() {
 
-        String apiKey = "ee47e5200a65463181b692571a4da7f8.dRETn3mDdI1voRD3 ";
+        String apiKey = "ee47e5200a65463181b692571a4da7f8.dRETn3mDdI1voRD3";
 
         OpenAiApi openAiApi = OpenAiApi.builder()
                 .baseUrl("https://api.z.ai/api/paas/v4")

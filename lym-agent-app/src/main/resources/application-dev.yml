@@ -44,13 +44,21 @@ spring:
   ai:
     zhipuai:
       api-key: ee47e5200a65463181b692571a4da7f8.dRETn3mDdI1voRD3
-    embedding:
-      model: embedding-3
+      embedding:
+        options:
+          model: embedding-3
     agent:
       auto-config:
         enabled: true
         client-ids: 3101,3102,3103,3104
-
+    model:
+      chat: none
+      embedding: zhipuai
+      image: none
+      audio:
+        speech: none
+        transcription: none
+      moderation: none
 
 # 日志
 logging:
