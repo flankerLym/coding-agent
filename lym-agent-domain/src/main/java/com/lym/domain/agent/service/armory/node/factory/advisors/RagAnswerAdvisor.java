@@ -1,4 +1,4 @@
-package com.lym.domain.agent.service.armory.node.factory.element;
+package com.lym.domain.agent.service.armory.node.factory.advisors;
 
 import com.alibaba.fastjson.JSON;
 import org.springframework.ai.chat.client.ChatClientRequest;
@@ -11,7 +11,6 @@ import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;

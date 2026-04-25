@@ -1,7 +1,6 @@
 package com.lym.domain.agent.model.valobj.enums;
 
 import com.lym.domain.agent.model.valobj.AiClientAdvisorVO;
-import com.lym.domain.agent.model.valobj.AiClientAdvisorVO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,7 +9,7 @@ import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
-import com.lym.domain.agent.service.armory.node.factory.element.RagAnswerAdvisor;
+import com.lym.domain.agent.service.armory.node.factory.advisors.RagAnswerAdvisor;
 
 import java.util.HashMap;
 import java.util.Map;
