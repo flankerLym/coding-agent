@@ -13,6 +13,7 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.ai.openai.OpenAiChatModel;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -28,6 +29,9 @@ import java.util.Map;
 @Slf4j
 @Service
 public class AiClientNode extends AbstractArmorySupport {
+
+    @Value("${spring.ai.agent.auto-config.fixed-mcp}")
+    private boolean fixedMcp;
 
     @Override
     protected String doApply(ArmoryCommandEntity requestParameter, DefaultArmoryStrategyFactory.DynamicContext dynamicContext) throws Exception {
@@ -55,9 +59,11 @@ public class AiClientNode extends AbstractArmorySupport {
 
             // 3. MCP 服务
             List<McpSyncClient> mcpSyncClients = new ArrayList<>();
-            List<String> mcpBeanNameList = aiClientVO.getMcpBeanNameList();
-            for (String mcpBeanName : mcpBeanNameList) {
-                mcpSyncClients.add(getBean(mcpBeanName));
+            if(fixedMcp) {
+                List<String> mcpBeanNameList = aiClientVO.getMcpBeanNameList();
+                for (String mcpBeanName : mcpBeanNameList) {
+                    mcpSyncClients.add(getBean(mcpBeanName));
+                }
             }
 
             // 4. advisor 顾问角色

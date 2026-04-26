@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Agent Chat</title>
+
+    <!-- 保留原项目已有的 Markdown / 代码高亮依赖；如果文件不存在，本页面也能降级运行 -->
+    <script src="js/marked.min.js"></script>
+    <script src="js/purify.min.js"></script>
+    <script src="js/highlight.min.js"></script>
+    <link rel="stylesheet" href="css/github.min.css" />
+
+    <link rel="stylesheet" href="css/chatgpt-agent.css" />
+</head>
+<body>
+<div class="app-shell">
+    <!-- 侧边栏 -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-top">
+            <button id="newChatBtn" class="new-chat-btn">+ 新对话</button>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="section-label">智能体</div>
+            <select id="agentSelector" class="agent-select">
+                <option value="">正在加载智能体...</option>
+            </select>
+            <div id="agentStatus" class="hint-text">页面加载后自动查询 ai_agent 列表，前端不再触发装配。</div>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="section-label">最大执行步数</div>
+            <div class="step-group">
+                <button class="step-btn" data-step="1">1</button>
+                <button class="step-btn" data-step="2">2</button>
+                <button class="step-btn" data-step="3">3</button>
+                <button class="step-btn active" data-step="5">5</button>
+                <button class="step-btn" data-step="10">10</button>
+            </div>
+        </div>
+
+        <div class="sidebar-section history-section">
+            <div class="section-label">历史对话</div>
+            <ul id="chatList" class="chat-list"></ul>
+        </div>
+
+        <div class="sidebar-footer">
+            <button id="clearAllChatsBtn" class="clear-btn">清空历史</button>
+        </div>
+    </aside>
+
+    <!-- 主对话区 -->
+    <main class="chat-main">
+        <header class="chat-header">
+            <button id="mobileSidebarBtn" class="icon-btn sidebar-toggle">☰</button>
+            <div class="header-title-wrap">
+                <div class="header-title">AI Agent</div>
+                <div class="header-subtitle" id="currentAgentName">请选择智能体</div>
+            </div>
+            <div class="header-actions">
+                <span id="requestStatus" class="request-status idle">空闲</span>
+            </div>
+        </header>
+
+        <section id="chatScroll" class="chat-scroll">
+            <div id="messageList" class="message-list"></div>
+        </section>
+
+        <footer class="composer-wrap">
+            <div class="quick-prompts">
+                <button class="quick-prompt" data-prompt="你好，请介绍一下当前智能体可以做什么。">介绍能力</button>
+                <button class="quick-prompt" data-prompt="请帮我分析这个任务，并给出可执行的步骤。">任务规划</button>
+                <button class="quick-prompt" data-prompt="请输出最终结论，并说明关键依据。">输出结论</button>
+            </div>
+
+            <div class="composer">
+                <textarea id="userInput" rows="1" placeholder="给 AI Agent 发送消息..."></textarea>
+                <div class="composer-bottom">
+                    <div class="session-info">会话 <span id="sessionIdText">-</span></div>
+                    <button id="sendBtn" class="send-btn" title="发送">发送</button>
+                </div>
+            </div>
+            <div class="input-tip">Enter 发送，Shift + Enter 换行。思考过程会自动折叠在回答下方。</div>
+        </footer>
+    </main>
+</div>
+
+<script src="js/chatgpt-agent-config.js"></script>
+<script src="js/chatgpt-agent.js"></script>
+</body>
+</html>
