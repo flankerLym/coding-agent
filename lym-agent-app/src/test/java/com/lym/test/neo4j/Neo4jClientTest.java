@@ -1,4 +1,4 @@
-package com.lym.test;
+package com.lym.test.neo4j;
 
 import com.lym.Application;
 import org.junit.Test;

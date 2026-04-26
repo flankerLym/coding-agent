@@ -4,7 +4,7 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Data
-@ConfigurationProperties(prefix = "spring.neo4j")
+@ConfigurationProperties(prefix = "spring.datasource.neo4j")
 public class Neo4jClientProperties {
 
     private String uri;

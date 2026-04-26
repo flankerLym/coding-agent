@@ -1,5 +1,6 @@
 package com.lym.test;
 
+import com.lym.Application;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,12 +11,20 @@ import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.annotation.Resource;
+
+
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = Application.class)
 public class ApiTest {
 
     private OpenAiChatModel openAiChatModel;
 
+    @Resource
+    private Neo4jClient neo4jClient;
     @Test
     public void test() {
 
