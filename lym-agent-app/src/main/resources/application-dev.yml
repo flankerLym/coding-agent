@@ -61,8 +61,8 @@ spring:
           model: embedding-3
     agent:
       auto-config:
-        enabled: true
-        client-ids: 3101,3102,3103,3104
+        enabled: false
+#        client-ids: 3101,3102,3103,3104
         fixed-mcp: false
     model:
       chat: none
