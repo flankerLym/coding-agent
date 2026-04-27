@@ -1,16 +1,16 @@
 (function () {
     const TOKEN_KEY = "coding_agent_token";
     const USER_KEY = "coding_agent_user";
-    const LOGIN_PAGE = "login.html";
-    const INDEX_PAGE = "index.html";
+    const LOGIN_PAGE = "../login/login.html";
+    const INDEX_PAGE = "../chatIndex/index.html";
 
     function currentPageName() {
         const path = window.location.pathname;
-        return path.substring(path.lastIndexOf("/") + 1) || INDEX_PAGE;
+        return path.substring(path.lastIndexOf("/") + 1) || "index.html";
     }
 
     function isLoginPage() {
-        return currentPageName() === LOGIN_PAGE;
+        return currentPageName() === "login.html";
     }
 
     function getToken() {
@@ -31,9 +31,7 @@
     }
 
     function buildRedirectLoginUrl() {
-        const page = currentPageName();
-        const query = window.location.search || "";
-        const redirect = encodeURIComponent(page + query);
+        const redirect = encodeURIComponent(window.location.pathname + (window.location.search || ""));
         return LOGIN_PAGE + "?redirect=" + redirect;
     }
 
@@ -84,23 +82,23 @@
 
     function renderUserEntry() {
         if (isLoginPage()) return;
-        const nav = document.querySelector("nav .flex.items-center.gap-2:last-child") || document.querySelector("nav");
-        if (!nav || document.getElementById("authUserBox")) return;
+        const headerActions = document.querySelector(".header-actions") || document.querySelector("nav");
+        if (!headerActions || document.getElementById("authUserBox")) return;
 
         const user = getUser() || {};
         const name = user.nickname || user.username || "已登录";
 
         const box = document.createElement("div");
         box.id = "authUserBox";
-        box.className = "flex items-center gap-2 ml-2 pl-3 border-l border-gray-200";
+        box.style.display = "flex";
+        box.style.alignItems = "center";
+        box.style.gap = "10px";
+        box.style.marginLeft = "12px";
         box.innerHTML = `
-            <div class="hidden md:flex flex-col items-end leading-tight">
-                <span class="text-xs font-medium text-gray-800">${name}</span>
-                <span class="text-[10px] text-gray-400">${user.roleCode || user.roleCodes || "USER"}</span>
-            </div>
-            <button id="logoutBtn" class="px-3 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors duration-200">退出</button>
-        `;
-        nav.appendChild(box);
+            <span style="font-size:12px;color:#475569;">${name}</span>
+            <button id="logoutBtn" style="height:32px;padding:0 12px;border:1px solid #e2e8f0;border-radius:10px;background:#fff;color:#475569;cursor:pointer;">退出</button>
++        `;
+        headerActions.appendChild(box);
 
         const logoutBtn = document.getElementById("logoutBtn");
         logoutBtn && logoutBtn.addEventListener("click", function () {
