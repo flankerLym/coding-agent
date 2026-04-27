@@ -1,8 +1,15 @@
 (function () {
-    const TOKEN_KEY = "coding_agent_token";
-    const USER_KEY = "coding_agent_user";
-    const LOGIN_PAGE = "../login/login.html";
-    const INDEX_PAGE = "../chatIndex/index.html";
+    const cfg = window.CodingAgentConfig || {
+        TOKEN_KEY: "coding_agent_token",
+        USER_KEY: "coding_agent_user",
+        LOGIN_PAGE: "../login/login.html",
+        INDEX_PAGE: "../chatIndex/index.html"
+    };
+
+    const TOKEN_KEY = cfg.TOKEN_KEY || "coding_agent_token";
+    const USER_KEY = cfg.USER_KEY || "coding_agent_user";
+    const LOGIN_PAGE = cfg.LOGIN_PAGE || "../login/login.html";
+    const INDEX_PAGE = cfg.INDEX_PAGE || "../chatIndex/index.html";
 
     function currentPageName() {
         const path = window.location.pathname;
@@ -51,11 +58,15 @@
     function shouldAttachToken(input) {
         const url = typeof input === "string" ? input : input && input.url;
         if (!url) return false;
-        return url.startsWith("/api/") || url.includes("/api/");
+        if (window.CodingAgentApi && typeof window.CodingAgentApi.isApiUrl === "function") {
+            return window.CodingAgentApi.isApiUrl(url);
+        }
+        return String(url).startsWith("/api/") || String(url).includes("/api/");
     }
 
     function installFetchAuthHeader() {
         if (!window.fetch || window.__codingAgentFetchPatched) return;
+
         const rawFetch = window.fetch.bind(window);
         window.fetch = function (input, init) {
             const token = getToken();
@@ -77,11 +88,13 @@
                 return response;
             });
         };
+
         window.__codingAgentFetchPatched = true;
     }
 
     function renderUserEntry() {
         if (isLoginPage()) return;
+
         const headerActions = document.querySelector(".header-actions") || document.querySelector("nav");
         if (!headerActions || document.getElementById("authUserBox")) return;
 
@@ -97,13 +110,24 @@
         box.innerHTML = `
             <span style="font-size:12px;color:#475569;">${name}</span>
             <button id="logoutBtn" style="height:32px;padding:0 12px;border:1px solid #e2e8f0;border-radius:10px;background:#fff;color:#475569;cursor:pointer;">退出</button>
-+        `;
+        `;
         headerActions.appendChild(box);
 
         const logoutBtn = document.getElementById("logoutBtn");
-        logoutBtn && logoutBtn.addEventListener("click", function () {
-            clearAuth();
-            window.location.href = LOGIN_PAGE;
+        logoutBtn && logoutBtn.addEventListener("click", async function () {
+            try {
+                const logoutUrl = window.CodingAgentApi && cfg.LOGOUT_URL
+                    ? window.CodingAgentApi.buildUrl(cfg.LOGOUT_URL)
+                    : null;
+                if (logoutUrl) {
+                    await fetch(logoutUrl, { method: "POST" });
+                }
+            } catch (_) {
+                // JWT 无状态退出，后端失败也允许前端清理。
+            } finally {
+                clearAuth();
+                window.location.href = LOGIN_PAGE;
+            }
         });
     }
 

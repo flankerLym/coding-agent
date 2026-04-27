@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>登录 - AI Auto Agent</title>
     <link rel="stylesheet" href="css/login.css">
+    <script src="../common/app-config.js"></script>
     <script src="js/auth.js"></script>
 </head>
 <body>
@@ -86,9 +87,10 @@
 </div>
 
 <script>
-    const LOGIN_API = "/api/v1/chat/user/login";
-    const TOKEN_KEY = "coding_agent_token";
-    const USER_KEY = "coding_agent_user";
+    const cfg = window.CodingAgentConfig;
+    const LOGIN_API = window.CodingAgentApi.buildUrl(cfg.LOGIN_URL);
+    const TOKEN_KEY = cfg.TOKEN_KEY;
+    const USER_KEY = cfg.USER_KEY;
 
     const form = document.getElementById("loginForm");
     const usernameInput = document.getElementById("username");
@@ -109,7 +111,17 @@
 
     function getRedirectUrl() {
         const params = new URLSearchParams(window.location.search);
-        return params.get("redirect") || "../chatIndex/index.html";
+        return params.get("redirect") || cfg.INDEX_PAGE || "../chatIndex/index.html";
+    }
+
+    async function readJsonSafely(response) {
+        const text = await response.text();
+        try {
+            return JSON.parse(text);
+        } catch (error) {
+            console.error("登录接口返回的不是 JSON：", text);
+            throw new Error("登录接口返回异常，请检查 API 地址或 nginx 代理");
+        }
     }
 
     togglePassword.addEventListener("click", () => {
@@ -140,7 +152,7 @@
                 body: JSON.stringify({ username, password })
             });
 
-            const result = await response.json();
+            const result = await readJsonSafely(response);
             if (!response.ok || result.code !== "0000" || !result.data || !result.data.token) {
                 showError(result.info || "账号或密码错误");
                 return;
@@ -160,7 +172,7 @@
             window.location.href = getRedirectUrl();
         } catch (error) {
             console.error("login failed", error);
-            showError("无法连接登录服务，请确认后端已启动");
+            showError("登录请求失败：" + (error.message || "请确认后端已启动"));
         } finally {
             loginButton.disabled = false;
             loginButton.textContent = "登录";
