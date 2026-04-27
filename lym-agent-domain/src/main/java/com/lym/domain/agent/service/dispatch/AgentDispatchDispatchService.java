@@ -4,7 +4,7 @@ import com.lym.domain.agent.adapter.repository.IAgentRepository;
 import com.lym.domain.agent.model.entity.ExecuteCommandEntity;
 import com.lym.domain.agent.model.valobj.AiAgentVO;
 import com.lym.domain.agent.service.IAgentDispatchService;
-import com.lym.domain.agent.service.execute.IExecuteStrategy;
+import com.lym.domain.agent.service.IExecuteStrategy;
 import com.lym.types.exception.BizException;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
