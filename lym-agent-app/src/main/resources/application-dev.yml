@@ -17,8 +17,6 @@ spring:
     redis:
       host: 175.178.182.172
       port: 16379
-      username: admin
-      password: 140810921
       database: 0
       timeout: 3s
   datasource:
