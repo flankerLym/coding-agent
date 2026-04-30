@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -35,7 +36,7 @@ import java.time.Duration;
  *    password=140810921
  */
 @Slf4j
-@RunWith(SpringRunner.class) // 测试初始化方法，在测试执行前调用
+@RunWith(SpringRunner.class)
 @SpringBootTest
 public class RedisConnectionTest {
 
@@ -44,7 +45,14 @@ public class RedisConnectionTest {
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
+    @Test
+    public void testLettuceCoreClassExists() throws Exception {
+        Class<?> clazz = Class.forName("io.lettuce.core.SslVerifyMode");
+        Assert.assertNotNull(clazz);
 
+        System.out.println("SslVerifyMode loaded from: "
+                + clazz.getProtectionDomain().getCodeSource().getLocation());
+    }
     @Test
     public void testRedisPing() {
         Assert.assertNotNull(redisConnectionFactory);
