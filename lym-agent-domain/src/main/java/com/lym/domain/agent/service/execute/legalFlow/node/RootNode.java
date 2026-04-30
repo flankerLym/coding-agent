@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
  * LLM 能力从 LegalIntentNode 开始。</p>
  */
 @Slf4j
-@Service
+@Service("legalFlowRootNode")
 public class RootNode implements StrategyHandler<ExecuteCommandEntity, DefaultLegalFlowExecuteStrategyFactory.DynamicContext, String> {
 
     @Resource

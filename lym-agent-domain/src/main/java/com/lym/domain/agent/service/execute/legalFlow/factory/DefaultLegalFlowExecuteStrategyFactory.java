@@ -22,7 +22,7 @@ import java.util.*;
 @Service
 public class DefaultLegalFlowExecuteStrategyFactory {
 
-    @Resource
+    @Resource(name = "legalFlowRootNode")
     private RootNode rootNode;
 
     public StrategyHandler<ExecuteCommandEntity, DynamicContext, String> armoryStrategyHandler() {
