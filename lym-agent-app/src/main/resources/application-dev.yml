@@ -13,6 +13,14 @@ thread:
         policy: CallerRunsPolicy
 # 数据库配置；启动时配置数据库资源信息
 spring:
+  data:
+    redis:
+      host: 175.178.182.172
+      port: 16379
+      username: admin
+      password: 140810921
+      database: 0
+      timeout: 3s
   datasource:
     mysql:
       username: root
