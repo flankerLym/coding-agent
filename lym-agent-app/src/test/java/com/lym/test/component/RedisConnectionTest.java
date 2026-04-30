@@ -2,10 +2,12 @@ package com.lym.test.component;
 
 import com.lym.config.RedisClientConfig;
 import com.lym.config.RedisClientProperties;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.connection.RedisConnection;
@@ -32,15 +34,9 @@ import java.time.Duration;
  *    username=admin
  *    password=140810921
  */
-@RunWith(SpringRunner.class)
-@TestPropertySource(properties = {
-        "spring.data.redis.host=175.178.182.172",
-        "spring.data.redis.port=16379",
-        "spring.data.redis.username=admin",
-        "spring.data.redis.password=140810921",
-        "spring.data.redis.database=0",
-        "spring.data.redis.timeout=3s"
-})
+@Slf4j
+@RunWith(SpringRunner.class) // 测试初始化方法，在测试执行前调用
+@SpringBootTest
 public class RedisConnectionTest {
 
     @Resource
