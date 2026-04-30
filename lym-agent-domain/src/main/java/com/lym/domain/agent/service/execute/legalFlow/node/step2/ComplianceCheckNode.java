@@ -7,6 +7,7 @@ import com.lym.domain.agent.model.entity.ExecuteCommandEntity;
 import com.lym.domain.agent.service.execute.legalFlow.LegalFlowSseUtils;
 import com.lym.domain.agent.service.execute.legalFlow.factory.DefaultLegalFlowExecuteStrategyFactory;
 import com.lym.domain.agent.service.execute.legalFlow.model.LegalDraftResult;
+import com.lym.domain.agent.service.execute.legalFlow.model.valobj.ClientIdEnums;
 import com.lym.domain.agent.service.execute.legalFlow.node.AbstractLegalLlmNodeSupport;
 import com.lym.domain.agent.service.execute.legalFlow.node.step3.CitationVerifyNode;
 import jakarta.annotation.Resource;
@@ -38,7 +39,7 @@ public class ComplianceCheckNode extends AbstractLegalLlmNodeSupport {
                 + "\n\n检索材料：\n" + JSON.toJSONString(context.getMemoryHits());
 
         String fallback = "{\"draft_type\":\"compliance_check\",\"draft_answer\":\"合规检查草稿：建议从监管要求、主体资质、业务流程和数据安全四方面审查。\",\"key_findings\":[\"当前为合规检查 Agent草稿。\"],\"risk_points\":[],\"missing_info\":[\"如需更准确分析，请补充完整材料。\"]}";
-        String content = callOpenAiChatClient(applicationContext, systemPrompt, userPrompt, fallback);
+        String content = callLegalChatClient(ClientIdEnums.COMPLIANCE_CHECK, systemPrompt, userPrompt, fallback);
 
         LegalDraftResult draftResult;
         try {

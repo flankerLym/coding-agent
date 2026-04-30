@@ -7,6 +7,7 @@ import com.lym.domain.agent.model.entity.ExecuteCommandEntity;
 import com.lym.domain.agent.service.execute.legalFlow.LegalFlowSseUtils;
 import com.lym.domain.agent.service.execute.legalFlow.factory.DefaultLegalFlowExecuteStrategyFactory;
 import com.lym.domain.agent.service.execute.legalFlow.model.LegalDraftResult;
+import com.lym.domain.agent.service.execute.legalFlow.model.valobj.ClientIdEnums;
 import com.lym.domain.agent.service.execute.legalFlow.node.AbstractLegalLlmNodeSupport;
 import com.lym.domain.agent.service.execute.legalFlow.node.step3.CitationVerifyNode;
 import jakarta.annotation.Resource;
@@ -38,7 +39,7 @@ public class GeneralChatNode extends AbstractLegalLlmNodeSupport {
                 + "\n\n检索材料：\n" + JSON.toJSONString(context.getMemoryHits());
 
         String fallback = "{\"draft_type\":\"general_chat\",\"draft_answer\":\"我可以帮你做合同审查、法律问答、案例检索、合规检查或法律文书草拟。请补充你的具体问题。\",\"key_findings\":[\"当前为普通法律对话 Agent草稿。\"],\"risk_points\":[],\"missing_info\":[\"如需更准确分析，请补充完整材料。\"]}";
-        String content = callOpenAiChatClient(applicationContext, systemPrompt, userPrompt, fallback);
+        String content = callLegalChatClient(ClientIdEnums.GENERAL_CHAT, systemPrompt, userPrompt, fallback);
 
         LegalDraftResult draftResult;
         try {

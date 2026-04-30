@@ -7,14 +7,17 @@ import com.lym.domain.agent.model.entity.ExecuteCommandEntity;
 import com.lym.domain.agent.service.execute.legalFlow.LegalFlowSseUtils;
 import com.lym.domain.agent.service.armory.node.factory.advisors.LegalFlowAdvisorChain;
 import com.lym.domain.agent.service.execute.legalFlow.factory.DefaultLegalFlowExecuteStrategyFactory;
+import com.lym.domain.agent.service.execute.legalFlow.model.valobj.ClientIdEnums;
 import com.lym.domain.agent.service.execute.legalFlow.node.AbstractLegalLlmNodeSupport;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 /**
  * MemorySummaryNode 仍然属于 LLM Node，因为它需要判断是否写入长期记忆并生成摘要。
  */
+@Slf4j
 @Service
 public class MemorySummaryNode extends AbstractLegalLlmNodeSupport {
 
@@ -43,8 +46,11 @@ public class MemorySummaryNode extends AbstractLegalLlmNodeSupport {
                 + context.getIntentCode() + "；风险等级：" + context.getRiskLevel()
                 + "；本轮完成法律分析、引用校验和风险分级。\"}";
 
-        String content = callOpenAiChatClient(applicationContext, systemPrompt, userPrompt, fallback);
-
+        String content = callLegalChatClient(ClientIdEnums.MEMORY_SUMMARY, systemPrompt, userPrompt, fallback);
+        log.info("意图识别Node 执行完成，clientId:{} beanName:{} result:{}",
+                ClientIdEnums.LEGAL_INTENT.getClientId(),
+                ClientIdEnums.LEGAL_INTENT.getBeanName(),
+                content == null ? null : content.substring(0, Math.min(content.length(), 500)));
         try {
             JSONObject jsonObject = JSON.parseObject(content);
             context.setShouldSaveMemory(jsonObject.getBoolean("should_save"));

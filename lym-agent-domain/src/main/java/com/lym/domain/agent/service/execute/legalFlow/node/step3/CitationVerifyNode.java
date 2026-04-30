@@ -6,14 +6,16 @@ import com.alibaba.fastjson.JSONObject;
 import com.lym.domain.agent.model.entity.ExecuteCommandEntity;
 import com.lym.domain.agent.service.execute.legalFlow.LegalFlowSseUtils;
 import com.lym.domain.agent.service.execute.legalFlow.factory.DefaultLegalFlowExecuteStrategyFactory;
+import com.lym.domain.agent.service.execute.legalFlow.model.valobj.ClientIdEnums;
 import com.lym.domain.agent.service.execute.legalFlow.node.AbstractLegalLlmNodeSupport;
 import com.lym.domain.agent.service.execute.legalFlow.node.step4.RiskGateNode;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-
+@Slf4j
 @Service
 public class CitationVerifyNode extends AbstractLegalLlmNodeSupport {
 
@@ -38,8 +40,11 @@ public class CitationVerifyNode extends AbstractLegalLlmNodeSupport {
                 + "\n\n检索材料：\n" + JSON.toJSONString(context.getMemoryHits());
 
         String fallback = "{\"citation_status\":\"partial\",\"supported_claims\":[\"通用风险提示可由检索材料支持\"],\"unsupported_claims\":[\"具体结论仍需补充完整材料\"],\"suggestion\":\"建议补充法律依据或完整材料\"}";
-        String content = callOpenAiChatClient(applicationContext, systemPrompt, userPrompt, fallback);
-
+        String content = callLegalChatClient(ClientIdEnums.CITATION_VERIFY, systemPrompt, userPrompt, fallback);
+        log.info("引用校验Node 执行完成，clientId:{} beanName:{} result:{}",
+                ClientIdEnums.LEGAL_INTENT.getClientId(),
+                ClientIdEnums.LEGAL_INTENT.getBeanName(),
+                content == null ? null : content.substring(0, Math.min(content.length(), 500)));
         try {
             JSONObject jsonObject = JSON.parseObject(content);
             context.setCitationStatus(jsonObject.getString("citation_status"));

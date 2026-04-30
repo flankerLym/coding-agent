@@ -7,6 +7,7 @@ import com.lym.domain.agent.model.entity.ExecuteCommandEntity;
 import com.lym.domain.agent.service.execute.legalFlow.LegalFlowSseUtils;
 import com.lym.domain.agent.service.execute.legalFlow.factory.DefaultLegalFlowExecuteStrategyFactory;
 import com.lym.domain.agent.service.execute.legalFlow.model.LegalDraftResult;
+import com.lym.domain.agent.service.execute.legalFlow.model.valobj.ClientIdEnums;
 import com.lym.domain.agent.service.execute.legalFlow.node.AbstractLegalLlmNodeSupport;
 import com.lym.domain.agent.service.execute.legalFlow.node.step3.CitationVerifyNode;
 import jakarta.annotation.Resource;
@@ -38,8 +39,7 @@ public class ContractReviewNode extends AbstractLegalLlmNodeSupport {
                 + "\n\n检索材料：\n" + JSON.toJSONString(context.getMemoryHits());
 
         String fallback = "{\"draft_type\":\"contract_review\",\"draft_answer\":\"合同审查草稿：建议重点关注付款、违约责任、解除条款、争议解决、保密和知识产权条款。\",\"key_findings\":[\"当前为合同审查 Agent草稿。\"],\"risk_points\":[],\"missing_info\":[\"如需更准确分析，请补充完整材料。\"]}";
-        String content = callOpenAiChatClient(applicationContext, systemPrompt, userPrompt, fallback);
-
+        String content = callLegalChatClient(ClientIdEnums.CONTRACT_REVIEW, systemPrompt, userPrompt, fallback);
         LegalDraftResult draftResult;
         try {
             JSONObject jsonObject = JSON.parseObject(content);

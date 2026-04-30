@@ -7,11 +7,13 @@ import com.lym.domain.agent.model.entity.ExecuteCommandEntity;
 import com.lym.domain.agent.service.execute.legalFlow.LegalFlowSseUtils;
 import com.lym.domain.agent.service.armory.node.factory.advisors.LegalFlowAdvisorChain;
 import com.lym.domain.agent.service.execute.legalFlow.factory.DefaultLegalFlowExecuteStrategyFactory;
+import com.lym.domain.agent.service.execute.legalFlow.model.valobj.ClientIdEnums;
 import com.lym.domain.agent.service.execute.legalFlow.node.AbstractLegalLlmNodeSupport;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-
+@Slf4j
 @Service
 public class LegalIntentNode extends AbstractLegalLlmNodeSupport {
 
@@ -41,8 +43,11 @@ public class LegalIntentNode extends AbstractLegalLlmNodeSupport {
                 + "\n\n请判断法律任务类型。";
 
         String fallback = JSON.toJSONString(ruleIntent(request.getMessage()));
-        String content = callOpenAiChatClient(applicationContext, systemPrompt, userPrompt, fallback);
-
+        String content = callLegalChatClient(ClientIdEnums.LEGAL_INTENT, systemPrompt, userPrompt, fallback);
+        log.info("意图识别Node 执行完成，clientId:{} beanName:{} result:{}",
+                ClientIdEnums.LEGAL_INTENT.getClientId(),
+                ClientIdEnums.LEGAL_INTENT.getBeanName(),
+                content == null ? null : content.substring(0, Math.min(content.length(), 500)));
         JSONObject jsonObject;
         try {
             jsonObject = JSON.parseObject(content);

@@ -5,12 +5,14 @@ import com.alibaba.fastjson.JSON;
 import com.lym.domain.agent.model.entity.ExecuteCommandEntity;
 import com.lym.domain.agent.service.execute.legalFlow.LegalFlowSseUtils;
 import com.lym.domain.agent.service.execute.legalFlow.factory.DefaultLegalFlowExecuteStrategyFactory;
+import com.lym.domain.agent.service.execute.legalFlow.model.valobj.ClientIdEnums;
 import com.lym.domain.agent.service.execute.legalFlow.node.AbstractLegalLlmNodeSupport;
 import com.lym.domain.agent.service.execute.legalFlow.node.step6.MemorySummaryNode;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-
+@Slf4j
 @Service
 public class AnswerGenerateNode extends AbstractLegalLlmNodeSupport {
 
@@ -42,9 +44,12 @@ public class AnswerGenerateNode extends AbstractLegalLlmNodeSupport {
                 + "\n\n检索材料：\n" + JSON.toJSONString(context.getMemoryHits());
 
         String fallback = buildFallbackAnswer(context);
-        String content = callOpenAiChatClient(applicationContext, systemPrompt, userPrompt, fallback);
+        String content = callLegalChatClient(ClientIdEnums.ANSWER_GENERATE, systemPrompt, userPrompt, fallback);
         context.setFinalAnswer(content);
-
+        log.info("回复生成Node 执行完成，clientId:{} beanName:{} result:{}",
+                ClientIdEnums.LEGAL_INTENT.getClientId(),
+                ClientIdEnums.LEGAL_INTENT.getBeanName(),
+                content == null ? null : content.substring(0, Math.min(content.length(), 500)));
         LegalFlowSseUtils.sendExecution(context.getEmitter(), 8,
                 "AnswerGenerateNode(openAiChatClient)：最终答案生成完成。",
                 context.getSessionId());

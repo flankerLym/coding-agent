@@ -7,6 +7,7 @@ import com.lym.domain.agent.model.entity.ExecuteCommandEntity;
 import com.lym.domain.agent.service.execute.legalFlow.LegalFlowSseUtils;
 import com.lym.domain.agent.service.execute.legalFlow.factory.DefaultLegalFlowExecuteStrategyFactory;
 import com.lym.domain.agent.service.execute.legalFlow.model.LegalDraftResult;
+import com.lym.domain.agent.service.execute.legalFlow.model.valobj.ClientIdEnums;
 import com.lym.domain.agent.service.execute.legalFlow.node.AbstractLegalLlmNodeSupport;
 import com.lym.domain.agent.service.execute.legalFlow.node.step3.CitationVerifyNode;
 import jakarta.annotation.Resource;
@@ -38,7 +39,7 @@ public class LegalDraftNode extends AbstractLegalLlmNodeSupport {
                 + "\n\n检索材料：\n" + JSON.toJSONString(context.getMemoryHits());
 
         String fallback = "{\"draft_type\":\"document_drafting\",\"draft_answer\":\"文书草拟草稿：建议使用【甲方】、【乙方】、【金额】、【日期】等占位符生成初稿。\",\"key_findings\":[\"当前为法律文书草拟 Agent草稿。\"],\"risk_points\":[],\"missing_info\":[\"如需更准确分析，请补充完整材料。\"]}";
-        String content = callOpenAiChatClient(applicationContext, systemPrompt, userPrompt, fallback);
+        String content = callLegalChatClient(ClientIdEnums.LEGAL_DRAFT, systemPrompt, userPrompt, fallback);
 
         LegalDraftResult draftResult;
         try {

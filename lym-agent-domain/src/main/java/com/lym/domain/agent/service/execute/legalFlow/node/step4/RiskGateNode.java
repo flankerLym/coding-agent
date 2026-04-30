@@ -6,12 +6,14 @@ import com.alibaba.fastjson.JSONObject;
 import com.lym.domain.agent.model.entity.ExecuteCommandEntity;
 import com.lym.domain.agent.service.execute.legalFlow.LegalFlowSseUtils;
 import com.lym.domain.agent.service.execute.legalFlow.factory.DefaultLegalFlowExecuteStrategyFactory;
+import com.lym.domain.agent.service.execute.legalFlow.model.valobj.ClientIdEnums;
 import com.lym.domain.agent.service.execute.legalFlow.node.AbstractLegalLlmNodeSupport;
 import com.lym.domain.agent.service.execute.legalFlow.node.step5.AnswerGenerateNode;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
-
+@Slf4j
 @Service
 public class RiskGateNode extends AbstractLegalLlmNodeSupport {
 
@@ -39,8 +41,11 @@ public class RiskGateNode extends AbstractLegalLlmNodeSupport {
                 + "\nunsupportedClaims：\n" + JSON.toJSONString(context.getUnsupportedClaims());
 
         String fallback = "{\"risk_level\":\"medium\",\"risk_reason\":\"涉及法律判断或合同权利义务，建议谨慎处理。\",\"need_human_review\":false}";
-        String content = callOpenAiChatClient(applicationContext, systemPrompt, userPrompt, fallback);
-
+        String content = callLegalChatClient(ClientIdEnums.RISK_GATE, systemPrompt, userPrompt, fallback);
+        log.info("风险分级Node 执行完成，clientId:{} beanName:{} result:{}",
+                ClientIdEnums.LEGAL_INTENT.getClientId(),
+                ClientIdEnums.LEGAL_INTENT.getBeanName(),
+                content == null ? null : content.substring(0, Math.min(content.length(), 500)));
         try {
             JSONObject jsonObject = JSON.parseObject(content);
             context.setRiskLevel(jsonObject.getString("risk_level"));
