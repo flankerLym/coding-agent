@@ -99,10 +99,31 @@ public class RedisConnectionTest {
         }
     }
 
-    @Configuration
-    @EnableConfigurationProperties(RedisClientProperties.class)
-    @Import(RedisClientConfig.class)
-    static class TestRedisConfig {
+    @Test
+    public void testRedisBigKeyWriteAndRead() {
+        Assert.assertNotNull(stringRedisTemplate);
+
+        String key = "legalflow:test:redis:big-key";
+
+        // 5MB 大 value，模拟 Redis Big Key
+        int size = 5 * 1024 * 1024;
+        StringBuilder builder = new StringBuilder(size);
+        for (int i = 0; i < size; i++) {
+            builder.append('A');
+        }
+        String value = builder.toString();
+            // 设置 TTL，避免测试 key 长期残留
+            stringRedisTemplate.opsForValue().set(key, value, Duration.ofMinutes(2));
+
+            String actual = stringRedisTemplate.opsForValue().get(key);
+
+            Assert.assertNotNull(actual);
+            Assert.assertEquals(value.length(), actual.length());
+            Assert.assertEquals(value, actual);
+
+            log.info("Redis big key write/read success, key={}, size={} bytes", key, value.length());
+
     }
+
 
 }
