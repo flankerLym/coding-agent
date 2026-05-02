@@ -11,19 +11,26 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AgentSessionEntity {
+public class AgentSessionQaRecordEntity {
 
     private Long id;
 
+    private String recordId;
+
     private String sessionId;
 
-    private String userId;
+    private Integer sequenceNo;
 
-    private String title;
+    private String userQuestion;
 
-    private String initialQuestion;
+    private String agentAnswer;
 
-    private Integer sessionStatus;
+    private String agentId;
+
+    /**
+     * 0-已保存问题，1-已保存回答，2-完整问答
+     */
+    private Integer recordStatus;
 
     private String extInfo;
 

@@ -1,4 +1,4 @@
-package com.lym.domain.agent.model.entity;
+package com.lym.ai.infrastructure.dao.po;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,21 +9,25 @@ import java.util.Date;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class AgentSessionEntity {
+@NoArgsConstructor
+public class AgentSessionQaRecordPO {
 
     private Long id;
 
+    private String recordId;
+
     private String sessionId;
 
-    private String userId;
+    private Integer sequenceNo;
 
-    private String title;
+    private String userQuestion;
 
-    private String initialQuestion;
+    private String agentAnswer;
 
-    private Integer sessionStatus;
+    private String agentId;
+
+    private Integer recordStatus;
 
     private String extInfo;
 

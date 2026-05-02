@@ -3,7 +3,6 @@ package com.lym.domain.agent.service.execute.legalFlow.node;
 import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.lym.domain.agent.model.entity.ExecuteCommandEntity;
 import com.lym.domain.agent.service.execute.legalFlow.LegalFlowSseUtils;
-import com.lym.domain.agent.service.advisors.LegalFlowAdvisorChain;
 import com.lym.domain.agent.service.execute.legalFlow.factory.DefaultLegalFlowExecuteStrategyFactory;
 import com.lym.domain.agent.service.execute.legalFlow.node.step1.MetaIntentNode;
 import jakarta.annotation.Resource;
@@ -20,8 +19,6 @@ import org.springframework.stereotype.Service;
 @Service("legalFlowRootNode")
 public class RootNode implements StrategyHandler<ExecuteCommandEntity, DefaultLegalFlowExecuteStrategyFactory.DynamicContext, String> {
 
-    @Resource
-    private LegalFlowAdvisorChain legalFlowAdvisorChain;
 
     @Resource
     private MetaIntentNode MetaIntentNode;
@@ -35,11 +32,6 @@ public class RootNode implements StrategyHandler<ExecuteCommandEntity, DefaultLe
         if (request.getMessage() == null || request.getMessage().trim().isEmpty()) {
             throw new IllegalArgumentException("用户问题不能为空");
         }
-
-        LegalFlowSseUtils.sendAnalysis(context.getEmitter(), 1,
-                "RootNode：执行前置 Advisor 链。", request.getSessionId());
-
-        legalFlowAdvisorChain.before(request, context);
 
         return MetaIntentNode.apply(request, context);
     }

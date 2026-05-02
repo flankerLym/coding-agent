@@ -3,7 +3,7 @@ package com.lym.domain.agent.service.execute.legalFlow.node.step1;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.lym.domain.agent.model.entity.ExecuteCommandEntity;
-import com.lym.domain.agent.service.advisors.LegalFlowAdvisorChain;
+
 import com.lym.domain.agent.service.execute.legalFlow.LegalFlowSseUtils;
 import com.lym.domain.agent.service.execute.legalFlow.factory.DefaultLegalFlowExecuteStrategyFactory;
 import com.lym.domain.agent.service.execute.legalFlow.model.valobj.ClientIdEnums;
@@ -23,8 +23,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class OpenLegalStrategyNode extends AbstractLegalLlmNodeSupport {
 
-    @Resource
-    private LegalFlowAdvisorChain legalFlowAdvisorChain;
+
     @Resource
     private IntentRouterNode intentRouterNode;
 
@@ -95,7 +94,6 @@ public class OpenLegalStrategyNode extends AbstractLegalLlmNodeSupport {
         log.info("OpenLegalStrategyNode completed. recommendedIntent={} reason={}",
                 recommendedIntent, context.getIntentReason());
 
-        legalFlowAdvisorChain.afterIntent(request, context);
         return router(request, context, intentRouterNode);
     }
 

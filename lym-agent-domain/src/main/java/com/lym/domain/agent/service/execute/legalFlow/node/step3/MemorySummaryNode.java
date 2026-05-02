@@ -4,8 +4,7 @@ import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.lym.domain.agent.model.entity.ExecuteCommandEntity;
-import com.lym.domain.agent.service.execute.legalFlow.LegalFlowSseUtils;
-import com.lym.domain.agent.service.advisors.LegalFlowAdvisorChain;
+
 import com.lym.domain.agent.service.execute.legalFlow.factory.DefaultLegalFlowExecuteStrategyFactory;
 import com.lym.domain.agent.service.execute.legalFlow.model.valobj.ClientIdEnums;
 import com.lym.domain.agent.service.execute.legalFlow.node.AbstractLegalLlmNodeSupport;
@@ -24,8 +23,6 @@ public class MemorySummaryNode extends AbstractLegalLlmNodeSupport {
     @Resource
     private ApplicationContext applicationContext;
 
-    @Resource
-    private LegalFlowAdvisorChain legalFlowAdvisorChain;
 
     @Override
     public String apply(ExecuteCommandEntity request,
@@ -62,12 +59,6 @@ public class MemorySummaryNode extends AbstractLegalLlmNodeSupport {
                     + "；本轮完成法律分析、引用校验和风险分级。");
         }
 
-        LegalFlowSseUtils.sendExecution(context.getEmitter(), 9,
-                "MemorySummaryNode(openAiChatClient)：摘要记忆生成完成，shouldSave=" + context.getShouldSaveMemory(),
-                context.getSessionId());
-
-        // LLM 节点结束后，执行后置持久化 Advisor
-        legalFlowAdvisorChain.afterAnswer(request, context);
 
         return "LEGAL_FLOW_SUCCESS";
     }

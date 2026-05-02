@@ -4,8 +4,7 @@ package com.lym.test;
 import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.lym.domain.agent.model.entity.ExecuteCommandEntity;
 import com.lym.domain.agent.service.IExecuteStrategy;
-import com.lym.domain.agent.service.advisors.LegalFlowAdvisor;
-import com.lym.domain.agent.service.advisors.LegalFlowAdvisorChain;
+
 import com.lym.domain.agent.service.execute.legalFlow.factory.DefaultLegalFlowExecuteStrategyFactory;
 import com.lym.domain.agent.service.execute.legalFlow.node.RootNode;
 import com.lym.domain.agent.service.execute.legalFlow.node.step1.MetaIntentNode;
@@ -70,12 +69,6 @@ public class LegalFlowChainTest { // 扫描指定包路径，注册相关 Bean
         MetaIntentNode legalIntentNode = applicationContext.getBean(MetaIntentNode.class); // 验证顾问实现不为空
         Assert.assertNotNull(legalIntentNode); // 验证顾问数量不少于 6 个
 
-        LegalFlowAdvisorChain advisorChain = applicationContext.getBean(LegalFlowAdvisorChain.class);
-        Assert.assertNotNull(advisorChain);
- // 测试合同审查完整流程，不依赖真实 OpenAI 客户端
-        Map<String, LegalFlowAdvisor> advisors = applicationContext.getBeansOfType(LegalFlowAdvisor.class); // 获取法律反应树策略
-        Assert.assertFalse("LegalFlowAdvisor 实现不能为空", advisors.isEmpty());
-        Assert.assertTrue("Advisor 数量不足，至少需要 6 个", advisors.size() >= 6); // 创建收集事件发射器
     }
         // 构建执行命令实体，包含合同审查请求
 
@@ -132,7 +125,6 @@ public class LegalFlowChainTest { // 扫描指定包路径，注册相关 Bean
 
         ExecuteCommandEntity command = ExecuteCommandEntity.builder() // 创建收集事件发射器
                 .aiAgentId("2")
-                .sessionId("unit_test_session_legal_qa")
                 .message("公司违法辞退员工，员工可以要求哪些赔偿？")
                 .maxStep(6) // 会话 ID
                 .build(); // 问答请求内容

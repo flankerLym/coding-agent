@@ -1,4 +1,4 @@
-package com.lym.domain.agent.model.entity;
+package com.lym.ai.infrastructure.dao.po;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,9 +9,9 @@ import java.util.Date;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class AgentSessionEntity {
+@NoArgsConstructor
+public class AgentSessionPO {
 
     private Long id;
 

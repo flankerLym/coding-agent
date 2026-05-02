@@ -3,7 +3,7 @@ package com.lym.domain.agent.service.execute.legalFlow.node.step1;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.lym.domain.agent.model.entity.ExecuteCommandEntity;
-import com.lym.domain.agent.service.advisors.LegalFlowAdvisorChain;
+
 import com.lym.domain.agent.service.execute.legalFlow.LegalFlowSseUtils;
 import com.lym.domain.agent.service.execute.legalFlow.factory.DefaultLegalFlowExecuteStrategyFactory;
 import com.lym.domain.agent.service.execute.legalFlow.model.valobj.ClientIdEnums;
@@ -20,8 +20,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class StandardIntentNode extends AbstractLegalLlmNodeSupport {
 
-    @Resource
-    private LegalFlowAdvisorChain legalFlowAdvisorChain;
+
     @Resource
     private IntentRouterNode intentRouterNode;
 
@@ -79,8 +78,7 @@ public class StandardIntentNode extends AbstractLegalLlmNodeSupport {
                 ClientIdEnums.LEGAL_INTENT.getBeanName(),
                 content == null ? null : content.substring(0, Math.min(content.length(), 500)));
 
-        // Intent 出来后，执行后置 Advisor：Neo4jSkillRouter / MySQLConfigLoader / PgVectorRetriever
-        legalFlowAdvisorChain.afterIntent(request, context);
+
 
         return router(request, context, intentRouterNode);
     }

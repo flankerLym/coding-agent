@@ -4,8 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.lym.domain.agent.model.entity.ExecuteCommandEntity;
-import com.lym.domain.agent.service.advisors.LegalFlowAdvisorChain;
-import com.lym.domain.agent.service.execute.legalFlow.LegalFlowSseUtils;
+
 import com.lym.domain.agent.service.execute.legalFlow.factory.DefaultLegalFlowExecuteStrategyFactory;
 import com.lym.domain.agent.service.execute.legalFlow.model.valobj.ClientIdEnums;
 import com.lym.domain.agent.service.execute.legalFlow.node.AbstractLegalLlmNodeSupport;
@@ -28,8 +27,7 @@ import java.util.List;
 @Service
 public class LegalQueryDecomposeNode extends AbstractLegalLlmNodeSupport {
 
-    @Resource
-    private LegalFlowAdvisorChain legalFlowAdvisorChain;
+
     @Resource
     private IntentRouterNode intentRouterNode;
 
@@ -109,19 +107,9 @@ public class LegalQueryDecomposeNode extends AbstractLegalLlmNodeSupport {
 
     // 添加追踪信息
         context.addTrace("[Decompose] primaryIntent=" + primaryIntent + ", subTasks=" + subTasks);
-
-    // 发送分析信息到SSE流
-        LegalFlowSseUtils.sendAnalysis(
-                context.getEmitter(),
-                4,
-                "LegalQueryDecomposeNode：主意图=" + primaryIntent + " subTasks=" + subTasks,
-                context.getSessionId());
-
     // 记录日志
         log.info("LegalQueryDecomposeNode completed. primaryIntent={} subTasks={}", primaryIntent, subTasks);
 
-        // 这里沿用原有 afterIntent 逻辑，不改 Advisor。
-        legalFlowAdvisorChain.afterIntent(request, context);
         return router(request, context, intentRouterNode);
     }
 

@@ -41,6 +41,7 @@ public class MetaIntentNode extends AbstractLegalLlmNodeSupport {
                   "need_decompose":false,
                   "route":"standard|clarify|decompose|open_strategy",
                   "confidence":0.0,
+                  "title":"",
                   "reason":""
                 }
 
@@ -49,7 +50,8 @@ public class MetaIntentNode extends AbstractLegalLlmNodeSupport {
                 2. 如果一个请求同时包含两个及以上可独立执行的任务，route=decompose。
                 3. 如果问题明显是方案设计、开放式咨询、系统规划、多角度建议，route=open_strategy。
                 4. 其他可直接执行的常规任务，route=standard。
-                5. 不要输出任何额外解释。
+                5. 为用户开启的这段对话起一个标题10个字以内，填入title
+                6. 不要输出任何额外解释。
                 """;
 
         String userPrompt = "用户问题：\n" + request.getMessage() +
@@ -68,7 +70,8 @@ public class MetaIntentNode extends AbstractLegalLlmNodeSupport {
         } catch (Exception e) {
             meta = fallback;
         }
-
+        String title = safeString(meta, "title", fallback.getString("title"));
+        context.setValue("meta_title", title);
         String questionType = safeString(meta, "question_type", fallback.getString("question_type"));
         String route = safeString(meta, "route", fallback.getString("route"));
         Boolean needClarification = safeBoolean(meta, "need_clarification", fallback.getBoolean("need_clarification"));

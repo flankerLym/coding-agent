@@ -7,6 +7,7 @@ import com.lym.domain.agent.service.execute.legalFlow.LegalFlowSseUtils;
 import com.lym.domain.agent.service.execute.legalFlow.factory.DefaultLegalFlowExecuteStrategyFactory;
 import com.lym.domain.agent.service.execute.legalFlow.model.valobj.ClientIdEnums;
 import com.lym.domain.agent.service.execute.legalFlow.node.AbstractLegalLlmNodeSupport;
+import com.lym.domain.agent.service.execute.legalFlow.utils.MessageRecordServer;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
@@ -14,6 +15,9 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class AnswerGenerateNode extends AbstractLegalLlmNodeSupport {
+
+    @Resource
+    private MessageRecordServer messageRecordServer;
 
     @Resource
     private ApplicationContext applicationContext;
@@ -45,6 +49,8 @@ public class AnswerGenerateNode extends AbstractLegalLlmNodeSupport {
         String fallback = buildFallbackAnswer(context);
         String content = callLegalChatClient(ClientIdEnums.ANSWER_GENERATE, systemPrompt, userPrompt, fallback);
         context.setFinalAnswer(content);
+        //保存对话记录
+        messageRecordServer.recordMessage(request, context, content);
         log.info("回复生成Node 执行完成，clientId:{} beanName:{} result:{}",
                 ClientIdEnums.LEGAL_INTENT.getClientId(),
                 ClientIdEnums.LEGAL_INTENT.getBeanName(),
