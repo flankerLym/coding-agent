@@ -1,6 +1,5 @@
 package com.lym.domain.agent.service.execute.legalFlow.node.step1;
 
-import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.lym.domain.agent.model.entity.ExecuteCommandEntity;
 import com.lym.domain.agent.service.execute.legalFlow.LegalFlowSseUtils;
 import com.lym.domain.agent.service.execute.legalFlow.factory.DefaultLegalFlowExecuteStrategyFactory;
@@ -12,48 +11,44 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-/**
- * IntentRouterNode 只做 LLM Node 跳转，不承载工程能力。
- *
- * 改造点：
- * 1. 兼容 step1 的 meta/decompose/open_strategy 结果；
- * 2. 打印 subTasks 方便后续 step2 扩展；
- * 3. 维持原有 step2 接线不变。
- */
 @Slf4j
 @Service
 public class IntentRouterNode extends AbstractLegalLlmNodeSupport {
 
-    @Resource
-    private ContractReviewNode contractReviewNode;
-    @Resource
-    private LegalQaNode legalQaNode;
-    @Resource
-    private CaseSearchNode caseSearchNode;
-    @Resource
-    private ComplianceCheckNode complianceCheckNode;
-    @Resource
-    private LegalDraftNode legalDraftNode;
-    @Resource
-    private GeneralChatNode generalChatNode;
+    @Resource private ContractReviewNode contractReviewNode;
+    @Resource private LegalQaNode legalQaNode;
+    @Resource private CaseSearchNode caseSearchNode;
+    @Resource private ComplianceCheckNode complianceCheckNode;
+    @Resource private LegalDraftNode legalDraftNode;
+    @Resource private GeneralChatNode generalChatNode;
+    @Resource private OpenStrategyExecutionNode openStrategyExecutionNode;
+    @Resource private SubTaskRouterNode subTaskRouterNode;
 
     @Override
     public String apply(ExecuteCommandEntity request,
                         DefaultLegalFlowExecuteStrategyFactory.DynamicContext context) throws Exception {
         List<String> subTasks = context.getValue("sub_tasks");
         String answerMode = context.getValue("answer_mode");
+        String metaRoute = context.getValue("meta_route");
 
         LegalFlowSseUtils.sendAnalysis(
                 context.getEmitter(),
                 5,
-                "IntentRouterNode：根据 intent 跳转业务 LLM Node："
-                        + context.getIntentCode()
-                        + (subTasks == null || subTasks.isEmpty() ? "" : " | subTasks=" + subTasks)
+                "IntentRouterNode：intent=" + context.getIntentCode()
+                        + (subTasks == null || subTasks.isEmpty() ? "" : " | subTasks=" + subTasks.size())
                         + (answerMode == null ? "" : " | answerMode=" + answerMode),
                 context.getSessionId());
 
         log.info("IntentRouterNode route intent={} subTasks={} answerMode={}",
                 context.getIntentCode(), subTasks, answerMode);
+
+        if (subTasks != null && !subTasks.isEmpty()) {
+            return subTaskRouterNode.apply(request, context);
+        }
+
+        if ("open_strategy".equals(answerMode) || "open_strategy".equals(metaRoute)) {
+            return openStrategyExecutionNode.apply(request, context);
+        }
 
         return switch (context.getIntentCode()) {
             case "contract_review" -> contractReviewNode.apply(request, context);
