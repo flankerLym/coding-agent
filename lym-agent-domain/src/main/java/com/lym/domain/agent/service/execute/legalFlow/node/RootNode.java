@@ -3,7 +3,7 @@ package com.lym.domain.agent.service.execute.legalFlow.node;
 import cn.bugstack.wrench.design.framework.tree.StrategyHandler;
 import com.lym.domain.agent.model.entity.ExecuteCommandEntity;
 import com.lym.domain.agent.service.execute.legalFlow.LegalFlowSseUtils;
-import com.lym.domain.agent.service.armory.node.factory.advisors.LegalFlowAdvisorChain;
+import com.lym.domain.agent.service.advisors.LegalFlowAdvisorChain;
 import com.lym.domain.agent.service.execute.legalFlow.factory.DefaultLegalFlowExecuteStrategyFactory;
 import com.lym.domain.agent.service.execute.legalFlow.node.step1.MetaIntentNode;
 import jakarta.annotation.Resource;

@@ -1,4 +1,4 @@
-package com.lym.domain.agent.service.armory.node.factory.advisors;
+package com.lym.domain.agent.service.advisors;
 
 import com.lym.domain.agent.model.entity.ExecuteCommandEntity;
 import com.lym.domain.agent.service.execute.legalFlow.factory.DefaultLegalFlowExecuteStrategyFactory;

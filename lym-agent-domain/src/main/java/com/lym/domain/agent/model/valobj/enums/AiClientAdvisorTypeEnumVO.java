@@ -9,7 +9,7 @@ import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
-import com.lym.domain.agent.service.armory.node.factory.advisors.RagAnswerAdvisor;
+import com.lym.domain.agent.service.advisors.RagAnswerAdvisor;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package com.lym.domain.agent.service.armory.node.factory.advisors;
+package com.lym.domain.agent.service.advisors;
 
 import com.alibaba.fastjson.JSON;
 import com.lym.domain.agent.adapter.repository.ISkillRepository;
