@@ -57,7 +57,7 @@ public class OpenLegalStrategyNode extends AbstractLegalLlmNodeSupport {
                 + "\n\n请输出推荐 JSON。";
 
         JSONObject fallback = ruleOpenStrategy(request.getMessage());
-        String content = callLegalChatClient(ClientIdEnums.LEGAL_INTENT,
+        String content = callLegalChatClient(ClientIdEnums.OPEN_LEGAL_STRATEGY,
                 systemPrompt,
                 userPrompt,
                 fallback.toJSONString());

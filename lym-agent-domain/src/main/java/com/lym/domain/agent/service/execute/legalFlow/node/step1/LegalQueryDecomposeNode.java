@@ -73,7 +73,7 @@ public class LegalQueryDecomposeNode extends AbstractLegalLlmNodeSupport {
     // 获取回退结果，用于当AI处理失败时的备选方案
         JSONObject fallback = ruleDecompose(request.getMessage());
     // 调用法律聊天客户端获取处理结果
-        String content = callLegalChatClient(ClientIdEnums.LEGAL_INTENT,
+        String content = callLegalChatClient(ClientIdEnums.LEGAL_QUERY_DECOMPOSE,
                 systemPrompt,
                 userPrompt,
                 fallback.toJSONString());

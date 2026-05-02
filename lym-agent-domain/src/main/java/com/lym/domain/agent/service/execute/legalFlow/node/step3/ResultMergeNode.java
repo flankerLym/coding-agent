@@ -73,7 +73,7 @@ public class ResultMergeNode extends AbstractLegalLlmNodeSupport {
                 + "\n\n请聚合成一个统一 LegalDraftResult JSON。";
 
         String fallback = buildFallbackMergeJson(agentResults);
-        String content = callLegalChatClient(ClientIdEnums.ANSWER_GENERATE, systemPrompt, userPrompt, fallback);
+        String content = callLegalChatClient(ClientIdEnums.RESULT_MERGE, systemPrompt, userPrompt, fallback);
 
         LegalDraftResult merged;
         try {

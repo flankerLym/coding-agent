@@ -21,60 +21,29 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum ClientIdEnums {
 
-    /**
-     * LegalIntentNode
-     */
-    LEGAL_INTENT("2011", "LegalIntentNode", "法律意图识别Client"),
-
-    /**
-     * ContractReviewNode
-     */
+    LEGAL_INTENT("2011", "LegalIntentNode", "Meta Intent识别Client"),
     CONTRACT_REVIEW("2012", "ContractReviewNode", "合同审查Client"),
-
-    /**
-     * LegalQaNode
-     */
     LEGAL_QA("2013", "LegalQaNode", "法律问答Client"),
-
-    /**
-     * CaseSearchNode
-     */
     CASE_SEARCH("2014", "CaseSearchNode", "案例检索Client"),
-
-    /**
-     * ComplianceCheckNode
-     */
     COMPLIANCE_CHECK("2015", "ComplianceCheckNode", "合规检查Client"),
-
-    /**
-     * LegalDraftNode
-     */
     LEGAL_DRAFT("2016", "LegalDraftNode", "法律文书草拟Client"),
-
-    /**
-     * GeneralChatNode
-     */
     GENERAL_CHAT("2017", "GeneralChatNode", "普通法律对话Client"),
-
-    /**
-     * CitationVerifyNode
-     */
     CITATION_VERIFY("2018", "CitationVerifyNode", "引用校验Client"),
-
-    /**
-     * RiskGateNode
-     */
     RISK_GATE("2019", "RiskGateNode", "风险分级Client"),
-
-    /**
-     * AnswerGenerateNode
-     */
     ANSWER_GENERATE("2020", "AnswerGenerateNode", "最终答案生成Client"),
+    MEMORY_SUMMARY("2021", "MemorySummaryNode", "摘要记忆Client"),
 
-    /**
-     * MemorySummaryNode
-     */
-    MEMORY_SUMMARY("2021", "MemorySummaryNode", "摘要记忆Client");
+    STANDARD_INTENT("2022", "StandardIntentNode", "标准意图识别Client"),
+
+    CLARIFY_QUESTION("2023", "ClarifyQuestionNode", "澄清问题Client"),
+
+    LEGAL_QUERY_DECOMPOSE("2024", "LegalQueryDecomposeNode", "复杂任务拆解Client"),
+
+    OPEN_LEGAL_STRATEGY("2025", "OpenLegalStrategyNode", "开放性问题识别Client"),
+
+    OPEN_STRATEGY_EXECUTION("2026", "OpenStrategyExecutionNode", "开放性方案执行Client"),
+
+    RESULT_MERGE("2027", "ResultMergeNode", "子任务结果聚合Client");
 
     /**
      * 数据库 ai_client.client_id

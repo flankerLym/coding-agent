@@ -8,6 +8,7 @@ import com.lym.domain.agent.service.armory.node.factory.advisors.LegalFlowAdviso
 import com.lym.domain.agent.service.armory.node.factory.advisors.LegalFlowAdvisorChain;
 import com.lym.domain.agent.service.execute.legalFlow.factory.DefaultLegalFlowExecuteStrategyFactory;
 import com.lym.domain.agent.service.execute.legalFlow.node.RootNode;
+import com.lym.domain.agent.service.execute.legalFlow.node.step1.MetaIntentNode;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
@@ -66,7 +67,7 @@ public class LegalFlowChainTest { // 扫描指定包路径，注册相关 Bean
         Assert.assertSame("Factory 返回的策略入口应该是 legalFlowRootNode", legalFlowRootNode, handler);
         // 获取所有法律流程顾问实现并验证其数量
 
-        LegalIntentNode legalIntentNode = applicationContext.getBean(LegalIntentNode.class); // 验证顾问实现不为空
+        MetaIntentNode legalIntentNode = applicationContext.getBean(MetaIntentNode.class); // 验证顾问实现不为空
         Assert.assertNotNull(legalIntentNode); // 验证顾问数量不少于 6 个
 
         LegalFlowAdvisorChain advisorChain = applicationContext.getBean(LegalFlowAdvisorChain.class);

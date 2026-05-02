@@ -33,7 +33,7 @@ public class ClarifyQuestionNode extends AbstractLegalLlmNodeSupport {
                 + "2. 是否有相关合同、材料、案情或上下文可供参考？\n"
                 + "3. 你希望我做的是审查、问答、检索、合规检查还是文书起草？";
 
-        String content = callLegalChatClient(ClientIdEnums.LEGAL_INTENT, systemPrompt, userPrompt, fallback);
+        String content = callLegalChatClient(ClientIdEnums.CLARIFY_QUESTION, systemPrompt, userPrompt, fallback);
         context.setFinalAnswer(content);
         context.setValue("clarify_mode", true);
         context.addTrace("[Clarify] 触发澄清问题节点。answer=" + content);

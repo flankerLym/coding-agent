@@ -44,7 +44,7 @@ public class StandardIntentNode extends AbstractLegalLlmNodeSupport {
                 + "\n\n请判断法律任务类型。";
 
         JSONObject fallback = ruleIntent(request.getMessage());
-        String content = callLegalChatClient(ClientIdEnums.LEGAL_INTENT,
+        String content = callLegalChatClient(ClientIdEnums.STANDARD_INTENT,
                 systemPrompt,
                 userPrompt,
                 fallback.toJSONString());

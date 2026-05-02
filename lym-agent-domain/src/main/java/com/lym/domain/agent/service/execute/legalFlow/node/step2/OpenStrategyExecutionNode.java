@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 public class OpenStrategyExecutionNode extends LegalBusinessNodeSupport {
     @Override protected String nodeName() { return "OpenStrategyExecutionNode"; }
     @Override protected String draftType() { return "open_strategy"; }
-    @Override protected ClientIdEnums clientIdEnums() { return ClientIdEnums.GENERAL_CHAT; }
+    @Override protected ClientIdEnums clientIdEnums() { return ClientIdEnums.OPEN_STRATEGY_EXECUTION; }
     @Override protected String systemPrompt() {
         return """
                 你是开放性方案执行 Agent。处理法律系统设计、合规体系建设、风险治理方案、复杂开放式咨询等问题。
