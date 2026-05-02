@@ -8,17 +8,13 @@ import com.lym.domain.agent.service.armory.node.factory.advisors.LegalFlowAdviso
 import com.lym.domain.agent.service.armory.node.factory.advisors.LegalFlowAdvisorChain;
 import com.lym.domain.agent.service.execute.legalFlow.factory.DefaultLegalFlowExecuteStrategyFactory;
 import com.lym.domain.agent.service.execute.legalFlow.node.RootNode;
-import com.lym.domain.agent.service.execute.legalFlow.node.step1.LegalIntentNode;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
