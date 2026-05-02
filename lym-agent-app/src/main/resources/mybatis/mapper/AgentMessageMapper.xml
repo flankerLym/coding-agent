@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lym.ai.infrastructure.dao.IAgentMessageDao">
+
+    <!-- 新增消息：只写 agent_message 表；before 写 user，after 写 assistant -->
+    <insert id="insert" parameterType="com.lym.ai.infrastructure.dao.po.AgentMessage" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO agent_message
+        (message_id, request_id, session_id, tenant_id, user_id, project_id, role_type, content, content_summary, intent, skill_code, create_time)
+        VALUES
+        (#{messageId}, #{requestId}, #{sessionId}, #{tenantId}, #{userId}, #{projectId}, #{roleType}, #{content}, #{contentSummary}, #{intent}, #{skillCode}, NOW())
+    </insert>
+
+</mapper>
