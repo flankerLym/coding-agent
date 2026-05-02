@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-public class LegalIntentNode extends AbstractLegalLlmNodeSupport {
+public class MetaIntentNode extends AbstractLegalLlmNodeSupport {
 
     @Resource
     private MetaIntentRouterNode metaIntentRouterNode;
