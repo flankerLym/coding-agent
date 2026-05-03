@@ -70,4 +70,20 @@
         ORDER BY sequence_no ASC, id ASC
     </select>
 
+    <select id="queryRecentUserQuestions" resultType="java.lang.String">
+        SELECT user_question
+        FROM (
+                 SELECT
+                     user_question,
+                     sequence_no
+                 FROM agent_session_qa_record
+                 WHERE session_id = #{sessionId}
+                   AND user_question IS NOT NULL
+                   AND user_question != ''
+                 ORDER BY sequence_no DESC
+                     LIMIT 10
+             ) t
+        ORDER BY sequence_no ASC
+    </select>
+
 </mapper>

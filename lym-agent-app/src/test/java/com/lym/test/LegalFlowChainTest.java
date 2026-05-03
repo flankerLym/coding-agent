@@ -124,6 +124,7 @@ public class LegalFlowChainTest { // 扫描指定包路径，注册相关 Bean
         CollectingEmitter emitter = new CollectingEmitter(); // 获取法律反应树策略
 
         ExecuteCommandEntity command = ExecuteCommandEntity.builder() // 创建收集事件发射器
+                .sessionId("S0ac16d49edfb4a2c8896baed307ccc4a")
                 .aiAgentId("2")
                 .message("公司违法辞退员工，员工可以要求哪些赔偿？")
                 .maxStep(6) // 会话 ID

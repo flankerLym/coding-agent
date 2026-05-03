@@ -15,4 +15,5 @@ public interface IAgentSessionQaRecordDao {
 
     List<AgentSessionQaRecordPO> queryBySessionId(@Param("sessionId") String sessionId);
 
+    List<String> queryRecentUserQuestions(@Param("sessionId") String sessionId);
 }

@@ -7,6 +7,7 @@ import com.lym.domain.agent.service.execute.legalFlow.LegalFlowSseUtils;
 import com.lym.domain.agent.service.execute.legalFlow.factory.DefaultLegalFlowExecuteStrategyFactory;
 import com.lym.domain.agent.service.execute.legalFlow.model.valobj.ClientIdEnums;
 import com.lym.domain.agent.service.execute.legalFlow.node.AbstractLegalLlmNodeSupport;
+import com.lym.domain.agent.service.execute.legalFlow.utils.ShortMemoryServer;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class MetaIntentNode extends AbstractLegalLlmNodeSupport {
 
+    @Resource
+    private ShortMemoryServer shortMemoryServer;
     @Resource
     private MetaIntentRouterNode metaIntentRouterNode;
 
@@ -54,6 +57,8 @@ public class MetaIntentNode extends AbstractLegalLlmNodeSupport {
                 6. 不要输出任何额外解释。
                 """;
 
+        context.setRecentContext(shortMemoryServer.getShortContext(request, context));
+        log.info("最近上下文：{}", context.getRecentContext());
         String userPrompt = "用户问题：\n" + request.getMessage() +
                 "\n\n最近上下文：\n" + JSON.toJSONString(context.getRecentContext()) +
                 "\n\n请输出 Meta Intent JSON。";

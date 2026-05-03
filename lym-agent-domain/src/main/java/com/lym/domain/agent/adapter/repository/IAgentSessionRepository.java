@@ -14,4 +14,8 @@ public interface IAgentSessionRepository {
     List<AgentSessionQaRecordEntity> queryMessageListBySessionId(String sessionId);
 
     String saveMessage(AgentSessionQaRecordEntity message);
+
+    List<String> queryShortMemory(String userId, String sessionId);
+
+    void addShortMemory(String userId, String sessionId, String message);
 }

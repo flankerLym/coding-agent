@@ -8,6 +8,7 @@ import com.lym.domain.agent.service.execute.legalFlow.factory.DefaultLegalFlowEx
 import com.lym.domain.agent.service.execute.legalFlow.model.valobj.ClientIdEnums;
 import com.lym.domain.agent.service.execute.legalFlow.node.AbstractLegalLlmNodeSupport;
 import com.lym.domain.agent.service.execute.legalFlow.utils.MessageRecordServer;
+import com.lym.domain.agent.service.execute.legalFlow.utils.ShortMemoryServer;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
@@ -18,6 +19,9 @@ public class AnswerGenerateNode extends AbstractLegalLlmNodeSupport {
 
     @Resource
     private MessageRecordServer messageRecordServer;
+
+    @Resource
+    private ShortMemoryServer shortMemoryServer;
 
     @Resource
     private ApplicationContext applicationContext;
@@ -50,7 +54,13 @@ public class AnswerGenerateNode extends AbstractLegalLlmNodeSupport {
         String content = callLegalChatClient(ClientIdEnums.ANSWER_GENERATE, systemPrompt, userPrompt, fallback);
         context.setFinalAnswer(content);
         //保存对话记录
-        messageRecordServer.recordMessage(request, context, content);
+        String sessionId = messageRecordServer.recordMessage(request, context, content);
+        if(request.getSessionId()== null){
+            request.setSessionId(sessionId);
+        }
+        shortMemoryServer.addShortMessage(request, context);
+
+
         log.info("回复生成Node 执行完成，clientId:{} beanName:{} result:{}",
                 ClientIdEnums.LEGAL_INTENT.getClientId(),
                 ClientIdEnums.LEGAL_INTENT.getBeanName(),

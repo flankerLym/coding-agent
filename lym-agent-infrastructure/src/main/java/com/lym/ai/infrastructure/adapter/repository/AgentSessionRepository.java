@@ -8,6 +8,7 @@ import com.lym.domain.agent.adapter.repository.IAgentSessionRepository;
 import com.lym.domain.agent.model.entity.AgentSessionEntity;
 import com.lym.domain.agent.model.entity.AgentSessionQaRecordEntity;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +20,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AgentSessionRepository implements IAgentSessionRepository {
 
+    private static final int SHORT_MEMORY_SIZE = 10;
+    private static final String EMPTY_CONTEXT = "无最近上下文";
+    private static final String SHORT_MEMORY_KEY_PREFIX = "legalflow:short_memory:";
+
     private final IAgentSessionDao agentSessionDao;
+    private final StringRedisTemplate stringRedisTemplate;
     private final IAgentSessionQaRecordDao agentSessionQaRecordDao;
 
     @Override
@@ -135,6 +141,66 @@ public class AgentSessionRepository implements IAgentSessionRepository {
                 .build();
     }
 
+    @Override
+    public List<String> queryShortMemory(String userId, String sessionId) {
+        if (sessionId == null || sessionId.isBlank()) {
+            return List.of(EMPTY_CONTEXT);
+        }
+
+        String redisKey = buildShortMemoryKey(userId, sessionId);
+
+        List<String> memoryList = stringRedisTemplate.opsForList().range(redisKey, 0, -1);
+        if (memoryList != null && !memoryList.isEmpty()) {
+            return memoryList;
+        }
+
+        List<String> recentQuestions = agentSessionQaRecordDao.queryRecentUserQuestions(sessionId);
+        if (recentQuestions == null || recentQuestions.isEmpty()) {
+            return List.of(EMPTY_CONTEXT);
+        }
+
+        stringRedisTemplate.opsForList().rightPushAll(redisKey, recentQuestions);
+        stringRedisTemplate.opsForList().trim(redisKey, -SHORT_MEMORY_SIZE, -1);
+
+        return recentQuestions;
+    }
+
+    @Override
+    public void addShortMemory(String userId, String sessionId, String message) {
+        if (sessionId == null || sessionId.isBlank()) {
+            return;
+        }
+
+        if (message == null || message.isBlank()) {
+            return;
+        }
+
+        String redisKey = buildShortMemoryKey(userId, sessionId);
+
+        stringRedisTemplate.opsForList().rightPush(redisKey, message);
+        stringRedisTemplate.opsForList().trim(redisKey, -SHORT_MEMORY_SIZE, -1);
+    }
+
+    private String buildShortMemoryKey(String userId, String sessionId) {
+        return SHORT_MEMORY_KEY_PREFIX + userId + ":" + sessionId;
+    }
+
+    private String buildMemoryText(AgentSessionQaRecordEntity record) {
+        StringBuilder builder = new StringBuilder();
+
+        if (record.getUserQuestion() != null && !record.getUserQuestion().isBlank()) {
+            builder.append("用户：").append(record.getUserQuestion());
+        }
+
+        if (record.getAgentAnswer() != null && !record.getAgentAnswer().isBlank()) {
+            if (!builder.isEmpty()) {
+                builder.append("\n");
+            }
+            builder.append("助手：").append(record.getAgentAnswer());
+        }
+
+        return builder.toString();
+    }
     private String generateSessionId() {
         return "S" + System.currentTimeMillis()
                 + UUID.randomUUID().toString().replace("-", "").substring(0, 8);
@@ -144,5 +210,6 @@ public class AgentSessionRepository implements IAgentSessionRepository {
         return "R" + System.currentTimeMillis()
                 + UUID.randomUUID().toString().replace("-", "").substring(0, 8);
     }
+
 
 }

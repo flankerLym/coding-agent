@@ -37,8 +37,7 @@ public class MessageRecordServer {
                             .build()
             );
         }
-
-        return agentSessionRepository.saveMessage(
+        agentSessionRepository.saveMessage(
                 AgentSessionQaRecordEntity.builder()
                         .recordId(generateRecordId())
                         .sessionId(sessionId)
@@ -48,6 +47,8 @@ public class MessageRecordServer {
                         .recordStatus(1)
                         .build()
         );
+        return sessionId;
+
     }
     private String generateSessionId() {
         return "S" + UUID.randomUUID().toString().replace("-", "");
