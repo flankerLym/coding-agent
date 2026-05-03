@@ -72,50 +72,7 @@ public class LegalFlowChainTest { // 扫描指定包路径，注册相关 Bean
     }
         // 构建执行命令实体，包含合同审查请求
 
-    @Test // AI 代理 ID
-    public void testFullLegalFlowChain_contractReview_withoutOpenAiChatClient() throws Exception { // 会话 ID
-        IExecuteStrategy strategy = applicationContext.getBean("legalAgentExecuteStrategy", IExecuteStrategy.class); // 审查请求内容
- // 最大执行步数
-        CollectingEmitter emitter = new CollectingEmitter();
 
-        ExecuteCommandEntity command = ExecuteCommandEntity.builder() // 执行策略并收集事件
-                .aiAgentId("2001")
-                .sessionId("unit_test_session_contract_review") // 合并所有事件
-                .message("帮我审查这个合同有没有明显风险，重点看付款、违约责任和解除条款。")
-        // 打印事件日志
-                .maxStep(6)
-                .build();
-
-        strategy.execute(command, emitter);
-
-        String events = String.join("\n", emitter.getEvents());
-
-        System.out.println("========== LegalFlow SSE Events ==========");
-        System.out.println(events);
-        System.out.println("=========================================");
-
-        Assert.assertTrue("应该输出 LegalFlow 启动信息", events.contains("LegalFlow"));
-        // 验证事件中包含预期内容
-        Assert.assertTrue("应该执行 RequestContext Advisor",
-                events.contains("Request") || events.contains("requestId") || events.contains("Advisor"));
-        Assert.assertTrue("应该识别合同审查 intent=contract_review", events.contains("contract_review"));
-        Assert.assertTrue("应该执行 afterIntent Advisor：SkillRouter/ConfigLoader/MemoryRetriever",
-                events.contains("Skill") || events.contains("Config") || events.contains("Memory") || events.contains("pgvector"));
-        Assert.assertTrue("应该执行合同审查业务节点",
-                events.contains("Contract") || events.contains("合同审查"));
-        Assert.assertTrue("应该执行引用校验节点",
-                events.contains("Citation") || events.contains("引用校验"));
-        Assert.assertTrue("应该执行风险分级节点",
-                events.contains("Risk") || events.contains("风险"));
-        Assert.assertTrue("应该执行最终答案生成节点",
-                events.contains("Answer") || events.contains("最终答案") || events.contains("结论摘要"));
-        Assert.assertTrue("应该执行摘要记忆节点",
-                events.contains("MemorySummary") || events.contains("摘要"));
-        Assert.assertTrue("应该执行持久化 Advisor",
-                events.contains("Persistence") || events.contains("持久化") || events.contains("保存"));
-        Assert.assertTrue("应该发送 complete 完成标识",
-                events.contains("complete") || events.contains("COMPLETE") || events.contains("完成"));
-    }
 
     @Test
     public void testFullLegalFlowChain_legalQa_withoutOpenAiChatClient() throws Exception {

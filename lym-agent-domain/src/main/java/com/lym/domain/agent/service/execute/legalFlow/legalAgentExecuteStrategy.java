@@ -33,6 +33,7 @@ public class legalAgentExecuteStrategy implements IExecuteStrategy {
         DefaultLegalFlowExecuteStrategyFactory.DynamicContext dynamicContext =
                 new DefaultLegalFlowExecuteStrategyFactory.DynamicContext();
 
+        dynamicContext.setUserId("test");
         dynamicContext.setEmitter(emitter);
         dynamicContext.setMaxStep(executeCommandEntity.getMaxStep() != null ? executeCommandEntity.getMaxStep() : 6);
         dynamicContext.setCurrentTask(executeCommandEntity.getMessage());
