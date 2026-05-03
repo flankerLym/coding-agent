@@ -54,10 +54,8 @@ public class AnswerGenerateNode extends AbstractLegalLlmNodeSupport {
         String content = callLegalChatClient(ClientIdEnums.ANSWER_GENERATE, systemPrompt, userPrompt, fallback);
         context.setFinalAnswer(content);
         //保存对话记录
-        String sessionId = messageRecordServer.recordMessage(request, context, content);
-        if(request.getSessionId()== null){
-            request.setSessionId(sessionId);
-        }
+        messageRecordServer.recordMessage(request, context, content);
+
         shortMemoryServer.addShortMessage(request, context);
 
 

@@ -8,6 +8,7 @@ import com.lym.domain.agent.model.entity.ExecuteCommandEntity;
 import com.lym.domain.agent.service.execute.legalFlow.factory.DefaultLegalFlowExecuteStrategyFactory;
 import com.lym.domain.agent.service.execute.legalFlow.model.valobj.ClientIdEnums;
 import com.lym.domain.agent.service.execute.legalFlow.node.AbstractLegalLlmNodeSupport;
+import com.lym.domain.agent.service.execute.legalFlow.utils.LongMemoryServer;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
@@ -23,6 +24,8 @@ public class MemorySummaryNode extends AbstractLegalLlmNodeSupport {
     @Resource
     private ApplicationContext applicationContext;
 
+    @Resource
+    private LongMemoryServer longMemoryServer;
 
     @Override
     public String apply(ExecuteCommandEntity request,
@@ -52,6 +55,7 @@ public class MemorySummaryNode extends AbstractLegalLlmNodeSupport {
             JSONObject jsonObject = JSON.parseObject(content);
             context.setShouldSaveMemory(jsonObject.getBoolean("should_save"));
             context.setMemorySummary(jsonObject.getString("summary"));
+            longMemoryServer.saveLongMemory(request, context);
         } catch (Exception e) {
             context.setShouldSaveMemory(!"general_chat".equals(context.getIntentCode()));
             context.setMemorySummary("用户问题类型：" + context.getIntentCode()

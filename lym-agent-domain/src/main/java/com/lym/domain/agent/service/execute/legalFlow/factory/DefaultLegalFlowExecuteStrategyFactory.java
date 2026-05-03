@@ -41,7 +41,8 @@ public class DefaultLegalFlowExecuteStrategyFactory {
         private String userId;
         private String projectId;
         private String sessionId;
-        private String requestId;
+        private String recordId;
+        private String MemoryId;
         private List<String> recentContext = new ArrayList<>();
 
         private String intentCode;

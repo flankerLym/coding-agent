@@ -19,7 +19,7 @@ public class MessageRecordServer {
      * 1. 有 sessionId：直接保存消息
      * 2. 没有 sessionId：先创建 session，再保存消息
      */
-    public String recordMessage(ExecuteCommandEntity request,
+    public void recordMessage(ExecuteCommandEntity request,
                                 DefaultLegalFlowExecuteStrategyFactory.DynamicContext context,
                                 String answer) {
 
@@ -37,9 +37,10 @@ public class MessageRecordServer {
                             .build()
             );
         }
+        String recordId = generateRecordId();
         agentSessionRepository.saveMessage(
                 AgentSessionQaRecordEntity.builder()
-                        .recordId(generateRecordId())
+                        .recordId(recordId)
                         .sessionId(sessionId)
                         .agentId(request.getAiAgentId())
                         .userQuestion(request.getMessage())
@@ -47,7 +48,8 @@ public class MessageRecordServer {
                         .recordStatus(1)
                         .build()
         );
-        return sessionId;
+        request.setSessionId(sessionId);
+        context.setRecordId(recordId);
 
     }
     private String generateSessionId() {

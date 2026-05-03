@@ -1,25 +1,32 @@
 package com.lym.ai.infrastructure.adapter.repository;
 
+import com.lym.ai.infrastructure.dao.IAgentLongMemoryDao;
 import com.lym.ai.infrastructure.dao.IAgentSessionDao;
 import com.lym.ai.infrastructure.dao.IAgentSessionQaRecordDao;
+import com.lym.ai.infrastructure.dao.po.AgentLongMemoryPO;
 import com.lym.ai.infrastructure.dao.po.AgentSessionPO;
 import com.lym.ai.infrastructure.dao.po.AgentSessionQaRecordPO;
 import com.lym.domain.agent.adapter.repository.IAgentSessionRepository;
+import com.lym.domain.agent.model.entity.AgentLongMemoryEntity;
 import com.lym.domain.agent.model.entity.AgentSessionEntity;
 import com.lym.domain.agent.model.entity.AgentSessionQaRecordEntity;
 import lombok.RequiredArgsConstructor;
+import org.springframework.ai.document.Document;
+
+import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.pgvector.PgVectorStore;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Repository
 @RequiredArgsConstructor
 public class AgentSessionRepository implements IAgentSessionRepository {
 
+    private final PgVectorStore longMemoryVectorStore;
+    private final IAgentLongMemoryDao agentLongMemoryDao;
     private static final int SHORT_MEMORY_SIZE = 10;
     private static final String EMPTY_CONTEXT = "无最近上下文";
     private static final String SHORT_MEMORY_KEY_PREFIX = "legalflow:short_memory:";
@@ -211,5 +218,145 @@ public class AgentSessionRepository implements IAgentSessionRepository {
                 + UUID.randomUUID().toString().replace("-", "").substring(0, 8);
     }
 
+    @Override
+    public String saveLongMemory(AgentLongMemoryEntity longMemory) {
+        String memoryId = longMemory.getMemoryId();
+        if (memoryId == null || memoryId.isBlank()) {
+            memoryId = generateMemoryId();
+        }
 
+        Date now = new Date();
+
+        AgentLongMemoryPO po = new AgentLongMemoryPO();
+        po.setMemoryId(memoryId);
+        po.setUserId(longMemory.getUserId());
+        po.setSessionId(longMemory.getSessionId());
+        po.setRecordId(longMemory.getRecordId());
+        po.setIntentCode(longMemory.getIntentCode());
+        po.setRiskLevel(longMemory.getRiskLevel());
+        po.setMemorySummary(longMemory.getMemorySummary());
+        po.setMemoryStatus(longMemory.getMemoryStatus() == null ? 1 : longMemory.getMemoryStatus());
+        po.setVectorStatus(longMemory.getVectorStatus() == null ? 0 : longMemory.getVectorStatus());
+        po.setVectorError(longMemory.getVectorError());
+        po.setExtInfo(longMemory.getExtInfo());
+        po.setCreateTime(now);
+        po.setUpdateTime(now);
+
+        agentLongMemoryDao.insert(po);
+
+        return memoryId;
+    }
+
+    @Override
+    public AgentLongMemoryEntity queryLongMemoryByMemoryId(String memoryId) {
+        AgentLongMemoryPO po = agentLongMemoryDao.queryByMemoryId(memoryId);
+        if (po == null) {
+            return null;
+        }
+
+        return AgentLongMemoryEntity.builder()
+                .id(po.getId())
+                .memoryId(po.getMemoryId())
+                .userId(po.getUserId())
+                .sessionId(po.getSessionId())
+                .recordId(po.getRecordId())
+                .intentCode(po.getIntentCode())
+                .riskLevel(po.getRiskLevel())
+                .memorySummary(po.getMemorySummary())
+                .memoryStatus(po.getMemoryStatus())
+                .vectorStatus(po.getVectorStatus())
+                .vectorError(po.getVectorError())
+                .extInfo(po.getExtInfo())
+                .createTime(po.getCreateTime())
+                .updateTime(po.getUpdateTime())
+                .build();
+    }
+
+    @Override
+    public void updateLongMemoryVectorStatus(String memoryId, Integer vectorStatus, String vectorError) {
+        agentLongMemoryDao.updateVectorStatus(memoryId, vectorStatus, vectorError);
+    }
+
+    @Override
+    public void saveLongMemoryVector(AgentLongMemoryEntity agentLongMemoryEntity) {
+        if (agentLongMemoryEntity == null) {
+            throw new IllegalArgumentException("长期记忆实体不能为空");
+        }
+
+        if (agentLongMemoryEntity.getMemoryId() == null || agentLongMemoryEntity.getMemoryId().isBlank()) {
+            throw new IllegalArgumentException("memoryId 不能为空，写入向量库前必须先保存 MySQL 并回填 memoryId");
+        }
+
+        if (agentLongMemoryEntity.getUserId() == null || agentLongMemoryEntity.getUserId().isBlank()) {
+            throw new IllegalArgumentException("userId 不能为空，长期记忆向量必须做用户隔离");
+        }
+
+        if (agentLongMemoryEntity.getMemorySummary() == null || agentLongMemoryEntity.getMemorySummary().isBlank()) {
+            throw new IllegalArgumentException("memorySummary 不能为空");
+        }
+
+        Map<String, Object> metadata = new HashMap<>();
+        metadata.put("memory_id", agentLongMemoryEntity.getMemoryId());
+        metadata.put("user_id", agentLongMemoryEntity.getUserId());
+
+        if (agentLongMemoryEntity.getSessionId() != null) {
+            metadata.put("session_id", agentLongMemoryEntity.getSessionId());
+        }
+        if (agentLongMemoryEntity.getRecordId() != null) {
+            metadata.put("record_id", agentLongMemoryEntity.getRecordId());
+        }
+        if (agentLongMemoryEntity.getIntentCode() != null) {
+            metadata.put("intent_code", agentLongMemoryEntity.getIntentCode());
+        }
+        if (agentLongMemoryEntity.getRiskLevel() != null) {
+            metadata.put("risk_level", agentLongMemoryEntity.getRiskLevel());
+        }
+        if (agentLongMemoryEntity.getMemoryStatus() != null) {
+            metadata.put("memory_status", agentLongMemoryEntity.getMemoryStatus());
+        }
+
+        Document document = Document.builder()
+                .text(agentLongMemoryEntity.getMemorySummary())
+                .metadata(metadata)
+                .build();
+
+        longMemoryVectorStore.add(List.of(document));
+    }
+
+    private String generateMemoryId() {
+        return "M" + UUID.randomUUID().toString().replace("-", "");
+    }
+
+    @Override
+    public List<String> queryLongMemory(String userId, String question, Integer topK) {
+        if (userId == null || userId.isBlank()) {
+            return List.of();
+        }
+
+        if (question == null || question.isBlank()) {
+            return List.of();
+        }
+
+        int finalTopK = topK == null ? 5 : topK;
+
+        String safeUserId = userId.replace("'", "\\'");
+
+        List<Document> documents = longMemoryVectorStore.similaritySearch(
+                SearchRequest.builder()
+                        .query(question)
+                        .topK(finalTopK)
+                        .similarityThreshold(0.65)
+                        .filterExpression("user_id == '" + safeUserId + "' && memory_status == 1")
+                        .build()
+        );
+
+        if (documents == null || documents.isEmpty()) {
+            return List.of();
+        }
+
+        return documents.stream()
+                .map(Document::getText)
+                .filter(text -> text != null && !text.isBlank())
+                .toList();
+    }
 }

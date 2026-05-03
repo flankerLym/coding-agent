@@ -1,5 +1,6 @@
 package com.lym.domain.agent.adapter.repository;
 
+import com.lym.domain.agent.model.entity.AgentLongMemoryEntity;
 import com.lym.domain.agent.model.entity.AgentSessionEntity;
 import com.lym.domain.agent.model.entity.AgentSessionQaRecordEntity;
 
@@ -18,4 +19,14 @@ public interface IAgentSessionRepository {
     List<String> queryShortMemory(String userId, String sessionId);
 
     void addShortMemory(String userId, String sessionId, String message);
+
+    String saveLongMemory(AgentLongMemoryEntity longMemory);
+
+    AgentLongMemoryEntity queryLongMemoryByMemoryId(String memoryId);
+
+    void updateLongMemoryVectorStatus(String memoryId, Integer vectorStatus, String vectorError);
+
+    void saveLongMemoryVector(AgentLongMemoryEntity agentLongMemoryEntity);
+
+    List<String> queryLongMemory(String userId, String question, Integer topK);
 }

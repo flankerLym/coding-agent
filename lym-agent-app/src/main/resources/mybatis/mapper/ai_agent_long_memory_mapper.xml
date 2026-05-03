@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.lym.ai.infrastructure.dao.IAgentLongMemoryDao">
+
+    <resultMap id="agentLongMemoryMap" type="com.lym.ai.infrastructure.dao.po.AgentLongMemoryPO">
+        <id column="id" property="id"/>
+        <result column="memory_id" property="memoryId"/>
+        <result column="user_id" property="userId"/>
+        <result column="session_id" property="sessionId"/>
+        <result column="record_id" property="recordId"/>
+        <result column="intent_code" property="intentCode"/>
+        <result column="risk_level" property="riskLevel"/>
+        <result column="memory_summary" property="memorySummary"/>
+        <result column="memory_status" property="memoryStatus"/>
+        <result column="vector_status" property="vectorStatus"/>
+        <result column="vector_error" property="vectorError"/>
+        <result column="ext_info" property="extInfo"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.lym.ai.infrastructure.dao.po.AgentLongMemoryPO"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO agent_long_memory (
+            memory_id,
+            user_id,
+            session_id,
+            record_id,
+            intent_code,
+            risk_level,
+            memory_summary,
+            memory_status,
+            vector_status,
+            vector_error,
+            ext_info,
+            create_time,
+            update_time
+        ) VALUES (
+                     #{memoryId},
+                     #{userId},
+                     #{sessionId},
+                     #{recordId},
+                     #{intentCode},
+                     #{riskLevel},
+                     #{memorySummary},
+                     #{memoryStatus},
+                     #{vectorStatus},
+                     #{vectorError},
+                     #{extInfo},
+                     #{createTime},
+                     #{updateTime}
+                 )
+    </insert>
+
+    <select id="queryByMemoryId" resultMap="agentLongMemoryMap">
+        SELECT
+            id,
+            memory_id,
+            user_id,
+            session_id,
+            record_id,
+            intent_code,
+            risk_level,
+            memory_summary,
+            memory_status,
+            vector_status,
+            vector_error,
+            ext_info,
+            create_time,
+            update_time
+        FROM agent_long_memory
+        WHERE memory_id = #{memoryId}
+    </select>
+
+    <update id="updateVectorStatus">
+        UPDATE agent_long_memory
+        SET vector_status = #{vectorStatus},
+            vector_error = #{vectorError},
+            update_time = NOW()
+        WHERE memory_id = #{memoryId}
+    </update>
+
+</mapper>

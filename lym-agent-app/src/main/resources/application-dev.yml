@@ -65,6 +65,7 @@ spring:
       embedding:
         options:
           model: embedding-3
+          dimensions: 1024
     agent:
       auto-config:
         enabled: true
