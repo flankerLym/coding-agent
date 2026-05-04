@@ -1,4 +1,4 @@
-package com.lym.domain.agent.service.execute.legalFlow.node.step1;
+package com.lym.domain.agent.service.execute.legalFlow.node.step1.Meta;
 
 import com.lym.domain.agent.model.entity.ExecuteCommandEntity;
 import com.lym.domain.agent.service.execute.legalFlow.LegalFlowSseUtils;

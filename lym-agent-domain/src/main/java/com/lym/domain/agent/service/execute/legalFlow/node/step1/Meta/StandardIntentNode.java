@@ -1,4 +1,4 @@
-package com.lym.domain.agent.service.execute.legalFlow.node.step1;
+package com.lym.domain.agent.service.execute.legalFlow.node.step1.Meta;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;

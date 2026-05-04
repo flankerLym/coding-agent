@@ -42,7 +42,7 @@ public class legalAgentExecuteStrategy implements IExecuteStrategy {
         try {
             LegalFlowSseUtils.sendAnalysis(emitter, 0, "LegalFlow 启动：Advisor 增强 + LLM 策略树。", executeCommandEntity.getSessionId());
             String result = handler.apply(executeCommandEntity, dynamicContext);
-            log.info("LegalFlow 执行完成 requestId:{} result:{}", dynamicContext.getRequestId(), result);
+            log.info("LegalFlow 执行完成 requestId:{} result:{}", dynamicContext.getRecordId(), result);
 
             LegalFlowSseUtils.sendSummary(emitter, dynamicContext.getFinalAnswer(), dynamicContext.getSessionId());
         } catch (Exception e) {

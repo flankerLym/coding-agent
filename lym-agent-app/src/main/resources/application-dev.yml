@@ -79,7 +79,29 @@ spring:
         speech: none
         transcription: none
       moderation: none
+legal:
+  web-code-search:
+    cache-seconds: 3600
+    max-page-size-bytes: 5242880
+    documents:
+      criminal_law:
+        name: 中华人民共和国刑法
+        url: https://www.fadada.com/article/Basics-020739
+        enabled: true
+      civil_code:
+        name: 中华人民共和国民法典
+        url: https://www.sdcourt.gov.cn/lcgtfy/374994/374995/6120123/index.html
+        enabled: true
 
+      civil_procedure_law:
+        name: 中华人民共和国民事诉讼法
+        url: https://jiangsu.chinatax.gov.cn/art/2023/9/1/art_23636_1028.html
+        enabled: true
+
+      labor_contract_law:
+        name: 中华人民共和国劳动合同法
+        url: https://rst.hunan.gov.cn/rst/zcfl/202211/t20221110_29121875.html
+        enabled: true
 # 日志
 logging:
   level:
