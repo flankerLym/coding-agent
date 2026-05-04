@@ -24,9 +24,6 @@ public class AnswerGenerateNode extends AbstractLegalLlmNodeSupport {
     private ShortMemoryServer shortMemoryServer;
 
     @Resource
-    private ApplicationContext applicationContext;
-
-    @Resource
     private MemorySummaryNode memorySummaryNode;
 
     @Override

@@ -5,6 +5,9 @@ import com.lym.domain.agent.service.execute.legalFlow.LegalFlowSseUtils;
 import com.lym.domain.agent.service.execute.legalFlow.factory.DefaultLegalFlowExecuteStrategyFactory;
 import com.lym.domain.agent.service.execute.legalFlow.model.valobj.ClientIdEnums;
 import com.lym.domain.agent.service.execute.legalFlow.node.AbstractLegalLlmNodeSupport;
+import com.lym.domain.agent.service.execute.legalFlow.utils.MessageRecordServer;
+import com.lym.domain.agent.service.execute.legalFlow.utils.ShortMemoryServer;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +18,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class ClarifyQuestionNode extends AbstractLegalLlmNodeSupport {
 
+    @Resource
+    private MessageRecordServer messageRecordServer;
+
+    @Resource
+    private ShortMemoryServer shortMemoryServer;
     @Override
     public String apply(ExecuteCommandEntity request,
                         DefaultLegalFlowExecuteStrategyFactory.DynamicContext context) {
@@ -37,7 +45,9 @@ public class ClarifyQuestionNode extends AbstractLegalLlmNodeSupport {
         context.setFinalAnswer(content);
         context.setValue("clarify_mode", true);
         context.addTrace("[Clarify] 触发澄清问题节点。answer=" + content);
+        messageRecordServer.recordMessage(request, context, content);
 
+        shortMemoryServer.addShortMessage(request, context);
         LegalFlowSseUtils.sendAnalysis(
                 context.getEmitter(),
                 4,
