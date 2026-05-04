@@ -10,6 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.context.ApplicationContext;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * 法律助手 LLM 策略树节点基类。
  *
@@ -21,6 +25,9 @@ import org.springframework.context.ApplicationContext;
 public abstract class AbstractLegalLlmNodeSupport implements
         StrategyHandler<ExecuteCommandEntity, DefaultLegalFlowExecuteStrategyFactory.DynamicContext, String> {
 
+    protected List<String> toolBeanNames() {
+        return Collections.emptyList();
+    }
     @Resource
     protected ApplicationContext applicationContext;
 
@@ -65,9 +72,36 @@ public abstract class AbstractLegalLlmNodeSupport implements
         try {
             ChatClient chatClient = getChatClientByClientId(clientIdEnums);
 
-            String content = chatClient.prompt()
+            var promptSpec = chatClient.prompt()
                     .system(systemPrompt)
-                    .user(userPrompt)
+                    .user(userPrompt);
+
+            List<String> toolBeanNames = toolBeanNames();
+            if (toolBeanNames != null && !toolBeanNames.isEmpty()) {
+                List<Object> toolBeans = new ArrayList<>();
+
+                for (String toolBeanName : toolBeanNames) {
+                    if (toolBeanName == null || toolBeanName.trim().isEmpty()) {
+                        continue;
+                    }
+
+                    try {
+                        Object toolBean = applicationContext.getBean(toolBeanName);
+                        toolBeans.add(toolBean);
+                        log.info("LegalFlow 挂载 Tool 成功，node:{} clientId:{} toolBean:{}",
+                                clientIdEnums.getNodeName(), clientId, toolBeanName);
+                    } catch (Exception e) {
+                        log.warn("LegalFlow 挂载 Tool 失败，node:{} clientId:{} toolBean:{} reason:{}",
+                                clientIdEnums.getNodeName(), clientId, toolBeanName, e.getMessage());
+                    }
+                }
+
+                if (!toolBeans.isEmpty()) {
+                    promptSpec = promptSpec.tools(toolBeans.toArray());
+                }
+            }
+
+            String content = promptSpec
                     .call()
                     .content();
 

@@ -10,10 +10,7 @@ import com.lym.domain.agent.service.execute.legalFlow.node.AbstractLegalLlmNodeS
 import com.lym.domain.agent.service.execute.legalFlow.node.step3.ResultMergeNode;
 import jakarta.annotation.Resource;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public abstract class LegalBusinessNodeSupport extends AbstractLegalLlmNodeSupport {
 
@@ -23,6 +20,7 @@ public abstract class LegalBusinessNodeSupport extends AbstractLegalLlmNodeSuppo
     protected abstract String nodeName();
 
     protected abstract String draftType();
+
 
     protected abstract ClientIdEnums clientIdEnums();
 

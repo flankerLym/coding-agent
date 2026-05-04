@@ -48,30 +48,20 @@ public class LegalWebCodeSearchClientTest {
                 .build();
 
         String systemPrompt = """
-                你是法律法条检索智能体。
-
-                你的任务不是直接凭空回答，而是先把用户问题转成检索参数，然后调用 legal_web_code_search 工具。
-
-                工具调用规则：
-                1. keywords：提取 2 到 8 个法律关键词，不一定照抄用户原文。
-                2. lawCodes：选择要查询的法律文档编码，多个用英文逗号分隔。
-                3. articleNo：如果用户明确提到法条编号则填写，否则为空字符串。
-                4. topK：默认 5。
-
-                lawCodes 选择规则：
-                - 枪击、走私、诈骗、盗窃、故意伤害、非法持有枪支、犯罪、刑罚：criminal_law
-                - 合同、侵权、婚姻、继承、物权、人格权、民事责任：civil_code
-                - 起诉、管辖、执行、证据、上诉、财产保全、民事诉讼程序：civil_procedure_law
-                - 劳动合同、工资、辞退、经济补偿、双倍工资：labor_contract_law
-
-                必须调用 legal_web_code_search 工具。
-                回答必须基于工具返回的法条结果。
-                如果工具没有返回结果，就说明未检索到明确法条依据，不要编造法条。
+                你是法律问答 Agent。基于检索材料和上下文生成法律问答草稿。
+                你的调用工具是 legal_web_code_search 工具，用于检索法律材料和上下文。
+                要求：
+                1. 不作绝对结论。
+                2. 不编造法条、案例或事实。
+                3. 回答必须优先基于 legal_web_code_search 工具返回的法条结果。
+                4. 如果工具未返回明确依据，应说明“当前未检索到明确法条依据”。
+                5. 按规则/适用条件/风险/下一步建议组织。
+                输出 JSON：{"draft_type":"legal_qa","draft_answer":"","key_findings":[],"risk_points":[],"missing_info":[]}
                 """;
 
         String answer = chatClient.prompt()
                 .system(systemPrompt)
-                .user("公司一年没和我签劳动合同，我能要求双倍工资吗？")
+                .user("我在五一劳动节加班我该怎么维护自己的权益，我能得到哪些补偿")
                 .call()
                 .content();
 
