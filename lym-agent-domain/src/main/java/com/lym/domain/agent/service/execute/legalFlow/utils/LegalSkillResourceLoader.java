@@ -32,10 +32,29 @@ public class LegalSkillResourceLoader {
     private LegalSkillResource loadFromClasspath(String skillId) {
         String basePath = SKILL_ROOT + "/" + skillId + "/";
 
-        String skillMarkdown = readIfExists(basePath + "skill.md");
-        String metadataYaml = readIfExists(basePath + "metadata.yaml");
-        String referenceYaml = readIfExists(basePath + "reference.yaml");
-        String scriptPython = readIfExists(basePath + "script.py");
+        String skillMarkdown = readFirstExisting(basePath,
+                "SKILL.md",
+                "skill.md"
+        );
+
+        String metadataYaml = readFirstExisting(basePath,
+                "metadata.yaml",
+                "metadata.yml",
+                "agents/openai.yaml"
+        );
+
+        String referenceYaml = readFirstExisting(basePath,
+                "reference.yaml",
+                "reference.yml",
+                "references/REFERENCE.md",
+                "references/reference.md"
+        );
+
+        String scriptPython = readFirstExisting(basePath,
+                "script.py",
+                "scripts/script.py",
+                "scripts/contract_review.py"
+        );
 
         String systemPrompt = extractSystemPrompt(metadataYaml);
 
@@ -56,6 +75,18 @@ public class LegalSkillResourceLoader {
         }
 
         return resource;
+    }
+
+    private String readFirstExisting(String basePath, String... relativePaths) {
+        for (String relativePath : relativePaths) {
+            String content = readIfExists(basePath + relativePath);
+
+            if (content != null && !content.trim().isEmpty()) {
+                return content;
+            }
+        }
+
+        return "";
     }
 
     private String readIfExists(String classpathLocation) {
@@ -98,6 +129,10 @@ public class LegalSkillResourceLoader {
 
         if (prompt == null || prompt.trim().isEmpty()) {
             prompt = extractYamlValue(metadataYaml, "systemPrompt");
+        }
+
+        if (prompt == null || prompt.trim().isEmpty()) {
+            prompt = extractYamlValue(metadataYaml, "system-prompt");
         }
 
         return prompt == null ? "" : prompt.trim();

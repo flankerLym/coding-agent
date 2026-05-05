@@ -8,19 +8,27 @@ import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.StreamUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Slf4j
 public class LegalSkillHardCodeClientTest {
 
     @Test
-    public void test_client_call_hard_code_skill() {
+    public void test_client_call_classpath_legal_compliance_skill() {
+
+        String apiKey = System.getenv("Z_AI_API_KEY");
+        if (apiKey == null || apiKey.trim().isEmpty()) {
+            throw new IllegalStateException("ee47e5200a65463181b692571a4da7f8.dRETn3mDdI1voRD3");
+        }
 
         OpenAiApi openAiApi = OpenAiApi.builder()
-                .apiKey("这里换成你的API_KEY")
+                .apiKey(apiKey)
                 .baseUrl("https://api.z.ai/api/paas/v4")
                 .completionsPath("/chat/completions")
                 .build();
@@ -35,103 +43,200 @@ public class LegalSkillHardCodeClientTest {
                 .defaultOptions(options)
                 .build();
 
-        // 这里手动 new 一个硬编码 Skill
-        HardCodeLegalSearchSkill hardCodeLegalSearchSkill = new HardCodeLegalSearchSkill();
+        // 这里不再硬编码法律材料，而是加载项目 resources/skills 下的真实 Skill
+        ClasspathLegalComplianceSkill classpathLegalComplianceSkill = new ClasspathLegalComplianceSkill();
 
         ChatClient chatClient = ChatClient.builder(chatModel)
-                .defaultTools(hardCodeLegalSearchSkill)
+                .defaultTools(classpathLegalComplianceSkill)
                 .build();
 
         String systemPrompt = """
-                你是法律问答 Agent。你可以调用 hard_code_legal_search_skill 工具检索法律依据。
+                你是合同审查 Agent。你必须先调用 legal_compliance_skill_loader 工具加载项目中的法律合规 Skill。
 
-                要求：
-                1. 遇到法律问题时，优先调用工具检索依据。
-                2. 不作绝对结论。
-                3. 不编造法条、案例或事实。
-                4. 回答必须优先基于工具返回的法条结果。
-                5. 如果工具未返回明确依据，应说明“当前未检索到明确法条依据”。
-                6. 按规则/适用条件/风险/下一步建议组织。
+                工具调用要求：
+                1. skillId 固定传入：legal-compliance。
+                2. skillAction 固定传入：contract-review。
+                3. 工具返回 SKILL.md、metadata.yaml、reference.yaml、script.py 等资源后，必须基于这些 Skill 资源执行合同审查。
+                4. 不得编造合同条款、事实或法律依据。
+                5. 如果合同文本信息不足，应放入 missing_info。
+                6. 输出必须严格是 JSON，不要输出 Markdown，不要输出解释性文字。
 
                 输出 JSON：
-                {"draft_type":"legal_qa","draft_answer":"","key_findings":[],"risk_points":[],"missing_info":[]}
+                {"draft_type":"contract_review","draft_answer":"","key_findings":[],"risk_points":[],"missing_info":[]}
+                """;
+
+        String userPrompt = """
+                请使用 legal-compliance Skill 中的 contract-review 能力，审查下面这段合同条款：
+
+                甲方委托乙方开发一套企业合同审查系统，合同金额为人民币 100000 元。
+                甲方应在系统上线后一次性支付全部费用。
+                如乙方延期交付，每延期一日支付合同总金额 0.01% 的违约金。
+                系统上线后，所有源代码和知识产权归乙方所有。
+                如发生争议，双方应提交乙方所在地法院解决。
+                合同未约定验收标准、交付时间、保密义务和数据安全责任。
+
+                请输出合同审查 JSON。
                 """;
 
         String answer = chatClient.prompt()
                 .system(systemPrompt)
-                .user("我在五一劳动节加班，我该怎么维护自己的权益，我能得到哪些补偿？")
+                .user(userPrompt)
                 .call()
                 .content();
 
         log.info("Agent 回答：{}", answer);
     }
 
-    public static class HardCodeLegalSearchSkill {
+    public static class ClasspathLegalComplianceSkill {
 
         @Tool(
-                name = "hard_code_legal_search_skill",
+                name = "legal_compliance_skill_loader",
                 description = """
-                        硬编码法律检索 Skill。
-                        用于根据关键词和 lawCodes 返回预置法条材料。
+                        从项目 classpath 加载法律合规 Skill 资源。
 
-                        可用 lawCodes：
-                        - labor_law：劳动法，适合加班费、法定节假日、工资报酬问题。
-                        - labor_contract_law：劳动合同法，适合劳动合同、工资支付、拖欠工资问题。
+                        当前主要用于加载：
+                        - skills/legal-compliance/SKILL.md
 
-                        使用规则：
-                        - 五一、国庆、春节、法定节假日、加班费、三倍工资：优先使用 labor_law。
-                        - 劳动合同、工资支付、拖欠工资、用人单位：可以使用 labor_contract_law。
-                        - 多个 lawCodes 用英文逗号分隔。
+                        同时兼容以下可选文件：
+                        - metadata.yaml
+                        - metadata.yml
+                        - reference.yaml
+                        - reference.yml
+                        - script.py
+                        - references/REFERENCE.md
+                        - scripts/script.py
+
+                        该工具只负责读取 Skill 资源，不负责直接给出法律结论。
                         """
         )
-        public List<Map<String, Object>> search(
+        public Map<String, Object> load(
                 @ToolParam(
-                        description = "法律检索关键词，例如：五一 加班 法定节假日 三倍工资",
+                        description = "Skill ID，例如 legal-compliance",
                         required = true
                 )
-                String keywords,
+                String skillId,
 
                 @ToolParam(
-                        description = "法律文档编码，例如：labor_law,labor_contract_law",
+                        description = "Skill 动作，例如 contract-review、legal-qa、labor-contract-check",
                         required = true
                 )
-                String lawCodes,
-
-                @ToolParam(
-                        description = "返回数量，默认5，最大10",
-                        required = false
-                )
-                Integer topK
+                String skillAction
         ) {
-            int limit = topK == null || topK <= 0 ? 5 : Math.min(topK, 10);
+            String normalizedSkillId = normalizeSkillId(skillId);
+            String normalizedSkillAction = normalizeSkillAction(skillAction);
 
-            List<Map<String, Object>> all = new ArrayList<>();
+            String basePath = "skills/" + normalizedSkillId + "/";
 
-            if (lawCodes != null && lawCodes.contains("labor_law")) {
-                all.add(Map.of(
-                        "lawCode", "labor_law",
-                        "lawName", "中华人民共和国劳动法",
-                        "articleNo", "第四十四条",
-                        "content", "《中华人民共和国劳动法》第四十四条：有下列情形之一的，用人单位应当按照下列标准支付高于劳动者正常工作时间工资的工资报酬：（一）安排劳动者延长工作时间的，支付不低于工资的百分之一百五十的工资报酬；（二）休息日安排劳动者工作又不能安排补休的，支付不低于工资的百分之二百的工资报酬；（三）法定休假日安排劳动者工作的，支付不低于工资的百分之三百的工资报酬。",
-                        "matchType", "keyword",
-                        "score", 100
-                ));
+            String skillMarkdown = readFirstExisting(basePath,
+                    "SKILL.md",
+                    "skill.md"
+            );
+
+            String metadataYaml = readFirstExisting(basePath,
+                    "metadata.yaml",
+                    "metadata.yml"
+            );
+
+            String reference = readFirstExisting(basePath,
+                    "reference.yaml",
+                    "reference.yml",
+                    "references/REFERENCE.md",
+                    "references/reference.md"
+            );
+
+            String scriptPython = readFirstExisting(basePath,
+                    "script.py",
+                    "scripts/script.py",
+                    "scripts/contract_review.py"
+            );
+
+            boolean available = hasText(skillMarkdown)
+                    || hasText(metadataYaml)
+                    || hasText(reference)
+                    || hasText(scriptPython);
+
+            Map<String, Object> result = new LinkedHashMap<>();
+            result.put("available", available);
+            result.put("skillId", normalizedSkillId);
+            result.put("skillAction", normalizedSkillAction);
+            result.put("basePath", basePath);
+            result.put("skillMarkdown", skillMarkdown);
+            result.put("metadataYaml", metadataYaml);
+            result.put("reference", reference);
+            result.put("scriptPython", scriptPython);
+
+            result.put("executionRules", """
+                    1. 优先按 skillAction 匹配 SKILL.md 中的能力说明。
+                    2. 如果 metadataYaml 存在 system_prompt，应优先遵守。
+                    3. 如果 reference 存在，应作为流程路由和风险检查参考。
+                    4. 如果 scriptPython 存在，当前测试仅作为规则参考，不在 Java 进程中直接执行 Python。
+                    5. 最终必须输出调用方要求的 JSON 结构。
+                    """);
+
+            log.info("加载 Skill 完成，skillId={}, skillAction={}, available={}, basePath={}",
+                    normalizedSkillId, normalizedSkillAction, available, basePath);
+
+            return result;
+        }
+
+        private String normalizeSkillId(String skillId) {
+            if (!hasText(skillId)) {
+                throw new IllegalArgumentException("skillId 不能为空");
             }
 
-            if (lawCodes != null && lawCodes.contains("labor_contract_law")) {
-                all.add(Map.of(
-                        "lawCode", "labor_contract_law",
-                        "lawName", "中华人民共和国劳动合同法",
-                        "articleNo", "第三十一条",
-                        "content", "《中华人民共和国劳动合同法》第三十一条：用人单位应当严格执行劳动定额标准，不得强迫或者变相强迫劳动者加班。用人单位安排加班的，应当按照国家有关规定向劳动者支付加班费。",
-                        "matchType", "keyword",
-                        "score", 80
-                ));
+            String value = skillId.trim();
+
+            if (!value.matches("[A-Za-z0-9_-]+")) {
+                throw new IllegalArgumentException("非法 skillId: " + skillId);
             }
 
-            return all.stream()
-                    .limit(limit)
-                    .toList();
+            return value;
+        }
+
+        private String normalizeSkillAction(String skillAction) {
+            if (!hasText(skillAction)) {
+                return "";
+            }
+
+            String value = skillAction.trim();
+
+            if (!value.matches("[A-Za-z0-9_-]+")) {
+                throw new IllegalArgumentException("非法 skillAction: " + skillAction);
+            }
+
+            return value;
+        }
+
+        private String readFirstExisting(String basePath, String... relativePaths) {
+            for (String relativePath : relativePaths) {
+                String content = readIfExists(basePath + relativePath);
+                if (hasText(content)) {
+                    return content;
+                }
+            }
+
+            return "";
+        }
+
+        private String readIfExists(String classpathLocation) {
+            try {
+                ClassPathResource resource = new ClassPathResource(classpathLocation);
+
+                if (!resource.exists()) {
+                    return "";
+                }
+
+                try (InputStream inputStream = resource.getInputStream()) {
+                    return StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
+                }
+            } catch (Exception e) {
+                log.warn("读取 Skill 资源失败，path={}, reason={}", classpathLocation, e.getMessage());
+                return "";
+            }
+        }
+
+        private boolean hasText(String value) {
+            return value != null && !value.trim().isEmpty();
         }
     }
 }

@@ -4,11 +4,9 @@ import com.lym.domain.agent.model.entity.ExecuteCommandEntity;
 import com.lym.domain.agent.service.execute.legalFlow.LegalFlowSseUtils;
 import com.lym.domain.agent.service.execute.legalFlow.factory.DefaultLegalFlowExecuteStrategyFactory;
 import com.lym.domain.agent.service.execute.legalFlow.model.LegalDraftResult;
-import com.lym.domain.agent.service.execute.legalFlow.model.skills.LegalSkillResource;
 import com.lym.domain.agent.service.execute.legalFlow.model.valobj.ClientIdEnums;
 import com.lym.domain.agent.service.execute.legalFlow.node.step2.LegalBusinessNodeSupport;
-
-import com.lym.domain.agent.service.execute.legalFlow.utils.LegalSkillResourceLoader;
+import com.lym.domain.agent.service.execute.legalFlow.utils.LegalSkillExecutionService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,12 +15,20 @@ import org.springframework.stereotype.Service;
 @Service
 public class ContractReviewNode extends LegalBusinessNodeSupport {
 
-    private static final String DEFAULT_SKILL_ID = "contract_review";
+    /**
+     * 对应 classpath:
+     * lym-agent-app/src/main/resources/skills/legal-compliance/SKILL.md
+     */
+    private static final String DEFAULT_SKILL_ID = "legal-compliance";
 
-    private static final int MAX_SKILL_SECTION_LENGTH = 4000;
+    /**
+     * 对应 legal-compliance 技能包中的合同审查能力。
+     * 后续同一个技能包下切换其他能力时，只改这个 action。
+     */
+    private static final String DEFAULT_SKILL_ACTION = "contract-review";
 
     @Resource
-    private LegalSkillResourceLoader legalSkillResourceLoader;
+    private LegalSkillExecutionService legalSkillExecutionService;
 
     @Override
     protected String nodeName() {
@@ -40,24 +46,25 @@ public class ContractReviewNode extends LegalBusinessNodeSupport {
     }
 
     /**
-     * 以后如果要换 Skill，只改这里即可。
-     *
-     * 例如：
-     * return "contract_review_v2";
+     * 以后适配其他 Skill，只需要改这里。
      */
     protected String skillId() {
         return DEFAULT_SKILL_ID;
     }
 
+    /**
+     * 以后适配同一个 Skill 包中的其他能力，只需要改这里。
+     */
+    protected String skillAction() {
+        return DEFAULT_SKILL_ACTION;
+    }
+
     @Override
     protected String systemPrompt() {
-        LegalSkillResource skillResource = legalSkillResourceLoader.load(skillId());
-
-        if (skillResource.hasSystemPrompt()) {
-            return skillResource.getSystemPrompt();
-        }
-
-        return defaultSystemPrompt();
+        return legalSkillExecutionService.systemPromptOrDefault(
+                skillId(),
+                this::defaultSystemPrompt
+        );
     }
 
     @Override
@@ -65,56 +72,11 @@ public class ContractReviewNode extends LegalBusinessNodeSupport {
                                      DefaultLegalFlowExecuteStrategyFactory.DynamicContext context) {
         String basePrompt = super.buildUserPrompt(request, context);
 
-        LegalSkillResource skillResource = legalSkillResourceLoader.load(skillId());
-
-        if (!skillResource.isAvailable()) {
-            return basePrompt;
-        }
-
-        StringBuilder prompt = new StringBuilder(basePrompt);
-
-        prompt.append("\n\n==================== 当前装配 Skill ====================\n");
-        prompt.append("skill_id: ").append(skillResource.getSkillId()).append("\n");
-
-        appendSkillSection(prompt, "skill.md", skillResource.getSkillMarkdown());
-        appendSkillSection(prompt, "metadata.yaml", skillResource.getMetadataYaml());
-        appendSkillSection(prompt, "reference.yaml", skillResource.getReferenceYaml());
-        appendSkillSection(prompt, "script.py", skillResource.getScriptPython());
-
-        prompt.append("\n\n使用要求：\n");
-        prompt.append("1. 优先遵守 metadata.yaml 中的 system_prompt。\n");
-        prompt.append("2. 使用 reference.yaml 作为合同审查流程路由和风险检查参考。\n");
-        prompt.append("3. skill.md 作为该 Skill 的能力说明。\n");
-        prompt.append("4. script.py 仅作为规则脚本参考，当前 Java 节点不直接执行 Python。\n");
-        prompt.append("5. 最终仍然必须严格输出 JSON，不要输出额外解释。\n");
-
-        return prompt.toString();
-    }
-
-    private void appendSkillSection(StringBuilder prompt, String title, String content) {
-        if (content == null || content.trim().isEmpty()) {
-            return;
-        }
-
-        prompt.append("\n\n-------------------- ")
-                .append(title)
-                .append(" --------------------\n")
-                .append(limit(content, MAX_SKILL_SECTION_LENGTH));
-    }
-
-    private String limit(String content, int maxLength) {
-        if (content == null) {
-            return "";
-        }
-
-        if (content.length() <= maxLength) {
-            return content;
-        }
-
-        return content.substring(0, maxLength)
-                + "\n\n[内容过长，已截断，原始长度="
-                + content.length()
-                + "]";
+        return legalSkillExecutionService.buildSkillAwareUserPrompt(
+                skillId(),
+                skillAction(),
+                basePrompt
+        );
     }
 
     private String defaultSystemPrompt() {
@@ -138,12 +100,12 @@ public class ContractReviewNode extends LegalBusinessNodeSupport {
         LegalFlowSseUtils.sendExecution(
                 context.getEmitter(),
                 5,
-                "ContractReviewNode(openAiChatClient)：合同审查草稿生成完成。",
+                "ContractReviewNode(openAiChatClient)：合同审查 Skill 执行完成。",
                 context.getSessionId()
         );
 
-        log.info("ContractReviewNode completed, skillId={}, draftType={}, answer={}",
-                skillId(), draftResult.getDraftType(), draftResult.getDraftAnswer());
+        log.info("ContractReviewNode completed, skillId={}, skillAction={}, draftType={}, answer={}",
+                skillId(), skillAction(), draftResult.getDraftType(), draftResult.getDraftAnswer());
 
         return afterDraft(request, context, draftResult);
     }
