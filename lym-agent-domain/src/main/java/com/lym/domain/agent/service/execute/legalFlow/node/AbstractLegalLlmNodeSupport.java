@@ -40,6 +40,9 @@ public abstract class AbstractLegalLlmNodeSupport implements
         return next.apply(request, context);
     }
 
+    protected boolean enableSystemPrompt() {
+        return true;
+    }
     /**
      * 完全模仿 auto 中的 getChatClientByClientId。
      */
@@ -73,9 +76,10 @@ public abstract class AbstractLegalLlmNodeSupport implements
             ChatClient chatClient = getChatClientByClientId(clientIdEnums);
 
             var promptSpec = chatClient.prompt()
-                    .system(systemPrompt)
                     .user(userPrompt);
-
+            if(enableSystemPrompt()) {
+               promptSpec = promptSpec.system(systemPrompt);
+            }
             List<String> toolBeanNames = toolBeanNames();
             if (toolBeanNames != null && !toolBeanNames.isEmpty()) {
                 List<Object> toolBeans = new ArrayList<>();

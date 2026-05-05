@@ -14,6 +14,11 @@ import org.springframework.stereotype.Service;
 public class CaseSearchNode extends LegalBusinessNodeSupport {
     @Override protected String nodeName() { return "CaseSearchNode"; }
     @Override protected String draftType() { return "case_search"; }
+
+    @Override
+    protected boolean enableSystemPrompt() {
+        return false;
+    }
     @Override protected ClientIdEnums clientIdEnums() { return ClientIdEnums.CASE_SEARCH; }
     @Override protected String systemPrompt() {
         return """
