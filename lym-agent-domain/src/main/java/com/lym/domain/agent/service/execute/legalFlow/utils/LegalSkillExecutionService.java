@@ -21,7 +21,7 @@ public class LegalSkillExecutionService {
     /**
      * 缓存已经组装好的 Skill Prompt Block。
      *
-     * key: skillId::skillAction
+     * key: skillId
      * value: 已经截断、格式化后的 Skill 增强片段
      */
     private final Map<String, String> skillPromptBlockCache = new ConcurrentHashMap<>();
@@ -45,18 +45,12 @@ public class LegalSkillExecutionService {
     /**
      * 执行节点级 Skill 增强。
      *
-     * 这里不会创建新的 ChatClient Bean。
-     * 这里也不会把 Skill 暴露成 ToolCall。
-     *
-     * 它只做一件事：
-     * 把当前节点指定的 Skill 内容追加到本次 userPrompt 中。
-     *
-     * Skill 内容的加载和组装会被缓存，避免每次重复拼接完整 Skill 块。
+     * 开发者只指定 skillId。
+     * Skill 包内具体 action / ability 的选择权交给大模型。
      */
     public String buildSkillAwareUserPrompt(String skillId,
-                                            String skillAction,
                                             String basePrompt) {
-        String skillPromptBlock = buildSkillPromptBlockOnce(skillId, skillAction);
+        String skillPromptBlock = buildSkillPromptBlockOnce(skillId);
 
         if (!hasText(skillPromptBlock)) {
             return basePrompt;
@@ -65,47 +59,43 @@ public class LegalSkillExecutionService {
         return basePrompt + skillPromptBlock;
     }
 
-    private String buildSkillPromptBlockOnce(String skillId, String skillAction) {
+    private String buildSkillPromptBlockOnce(String skillId) {
         String normalizedSkillId = normalizeSkillId(skillId);
-        String normalizedSkillAction = normalizeSkillAction(skillAction);
 
-        String cacheKey = normalizedSkillId + "::" + normalizedSkillAction;
-
-        return skillPromptBlockCache.computeIfAbsent(cacheKey, key -> {
+        return skillPromptBlockCache.computeIfAbsent(normalizedSkillId, key -> {
             LegalSkillResource skillResource = legalSkillResourceLoader.load(normalizedSkillId);
 
             if (!skillResource.isAvailable()) {
-                log.warn("Skill 不可用，跳过节点级 Skill 增强，skillId={}, skillAction={}",
-                        normalizedSkillId, normalizedSkillAction);
+                log.warn("Skill 不可用，跳过节点级 Skill 增强，skillId={}", normalizedSkillId);
                 return "";
             }
 
             StringBuilder prompt = new StringBuilder();
 
-            prompt.append("\n\n==================== 当前执行节点已装配 Skill ====================\n");
+            prompt.append("\n\n==================== 当前执行节点已装配 Skill 包 ====================\n");
             prompt.append("skill_id: ").append(skillResource.getSkillId()).append("\n");
-
-            if (hasText(normalizedSkillAction)) {
-                prompt.append("skill_action: ").append(normalizedSkillAction).append("\n");
-            }
 
             appendSkillSection(prompt, "SKILL.md", skillResource.getSkillMarkdown());
             appendSkillSection(prompt, "metadata.yaml", skillResource.getMetadataYaml());
             appendSkillSection(prompt, "reference.yaml", skillResource.getReferenceYaml());
             appendSkillSection(prompt, "script.py", skillResource.getScriptPython());
 
-            prompt.append("\n\nSkill 执行要求：\n");
-            prompt.append("1. 当前 Skill 已由服务端执行节点装配，你不能自行请求加载、切换或声明其他 Skill。\n");
-            prompt.append("2. 当前业务节点指定的 skill_action 是当前优先能力；如果 SKILL.md 中包含该能力说明，必须优先按该能力执行。\n");
-            prompt.append("3. 如果 SKILL.md 中包含多个能力，只能选择与当前用户问题和当前节点任务最匹配的能力。\n");
-            prompt.append("4. 如果 metadata.yaml 中存在 system_prompt，应优先遵守 metadata.yaml 的 system_prompt。\n");
-            prompt.append("5. 如果 reference.yaml 存在，将其作为流程路由、风险检查项和输出规范参考。\n");
-            prompt.append("6. 如果 script.py 存在，当前阶段仅作为确定性规则参考，不在 Java 进程中直接执行 Python。\n");
-            prompt.append("7. 不得编造合同条款、事实、法律依据、案例或脚本执行结果。\n");
-            prompt.append("8. 最终必须严格输出当前节点要求的 JSON，不要输出 Markdown、解释性文字或代码块。\n");
+            prompt.append("\n\nSkill 包执行要求：\n");
+            prompt.append("1. 当前 Skill 包已由服务端执行节点装配，你不能自行请求加载、切换或声明其他 Skill 包。\n");
+            prompt.append("2. 开发者没有指定 Skill 内部 action，具体使用哪个能力必须由你根据用户问题、当前子任务、最近上下文和 SKILL.md 内容自动选择。\n");
+            prompt.append("3. 如果 SKILL.md 中包含多个能力，例如 contract-review、contract-compare、contract-extract、contract-risk-score，应根据场景自动选择最匹配的能力。\n");
+            prompt.append("4. 如果用户提供的是单份合同并要求审查，应优先选择合同审查类能力。\n");
+            prompt.append("5. 如果用户提供两份合同并要求找差异，应优先选择合同对比类能力。\n");
+            prompt.append("6. 如果用户要求提取甲乙方、金额、期限等信息，应优先选择合同信息提取类能力。\n");
+            prompt.append("7. 如果用户要求风险分数，应优先选择合同风险评分类能力。\n");
+            prompt.append("8. 如果 metadata.yaml 中存在 system_prompt，应优先遵守 metadata.yaml 的 system_prompt。\n");
+            prompt.append("9. 如果 reference.yaml 存在，将其作为流程路由、风险检查项和输出规范参考。\n");
+            prompt.append("10. 如果 script.py 存在，当前阶段仅作为确定性规则参考，不在 Java 进程中直接执行 Python。\n");
+            prompt.append("11. 不得编造合同条款、事实、法律依据、案例或脚本执行结果。\n");
+            prompt.append("12. 最终必须严格输出当前节点要求的 JSON，不要输出 Markdown、解释性文字或代码块。\n");
 
-            log.info("执行节点级 Skill Prompt Block 组装完成并缓存，skillId={}, skillAction={}, length={}",
-                    normalizedSkillId, normalizedSkillAction, prompt.length());
+            log.info("执行节点级 Skill Prompt Block 组装完成并缓存，skillId={}, length={}",
+                    normalizedSkillId, prompt.length());
 
             return prompt.toString();
         });
@@ -151,20 +141,6 @@ public class LegalSkillExecutionService {
         return value;
     }
 
-    private String normalizeSkillAction(String skillAction) {
-        if (!hasText(skillAction)) {
-            return "";
-        }
-
-        String value = skillAction.trim();
-
-        if (!value.matches("[A-Za-z0-9_-]+")) {
-            throw new IllegalArgumentException("非法 skillAction: " + skillAction);
-        }
-
-        return value;
-    }
-
     private boolean hasText(String value) {
         return value != null && !value.trim().isEmpty();
     }
@@ -172,8 +148,6 @@ public class LegalSkillExecutionService {
     /**
      * 本地开发调试时，如果改了 resources/skills 下的文件，
      * 可以手动调用这个方法清理缓存。
-     *
-     * 生产环境一般不需要调用。
      */
     public void clearSkillPromptBlockCache() {
         skillPromptBlockCache.clear();

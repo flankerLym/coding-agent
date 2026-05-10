@@ -77,6 +77,25 @@ public class LegalSkillResourceLoader {
         return resource;
     }
 
+    private String readCombinedExisting(String basePath, String... relativePaths) {
+        StringBuilder builder = new StringBuilder();
+
+        for (String relativePath : relativePaths) {
+            String content = readIfExists(basePath + relativePath);
+
+            if (content == null || content.trim().isEmpty()) {
+                continue;
+            }
+
+            builder.append("\n\n-------------------- ")
+                    .append(relativePath)
+                    .append(" --------------------\n")
+                    .append(content);
+        }
+
+        return builder.toString();
+    }
+
     private String readFirstExisting(String basePath, String... relativePaths) {
         for (String relativePath : relativePaths) {
             String content = readIfExists(basePath + relativePath);

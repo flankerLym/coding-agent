@@ -16,16 +16,12 @@ import org.springframework.stereotype.Service;
 public class ContractReviewNode extends LegalBusinessNodeSupport {
 
     /**
-     * 对应 classpath:
-     * lym-agent-app/src/main/resources/skills/legal-compliance/SKILL.md
+     * 只指定 Skill 包名称。
+     *
+     * 具体使用 legal-compliance 中的 contract-review、contract-compare、
+     * contract-extract、contract-risk-score 等能力，由大模型根据用户问题和 SKILL.md 自动选择。
      */
     private static final String DEFAULT_SKILL_ID = "legal-compliance";
-
-    /**
-     * 对应 legal-compliance 技能包中的合同审查能力。
-     * 后续同一个技能包下切换其他能力时，只改这个 action。
-     */
-    private static final String DEFAULT_SKILL_ACTION = "contract-review";
 
     @Resource
     private LegalSkillExecutionService legalSkillExecutionService;
@@ -46,17 +42,11 @@ public class ContractReviewNode extends LegalBusinessNodeSupport {
     }
 
     /**
-     * 以后适配其他 Skill，只需要改这里。
+     * 以后适配其他 Skill 包，只改这里。
+     * 不再由开发者指定 Skill 内部 action。
      */
     protected String skillId() {
         return DEFAULT_SKILL_ID;
-    }
-
-    /**
-     * 以后适配同一个 Skill 包中的其他能力，只需要改这里。
-     */
-    protected String skillAction() {
-        return DEFAULT_SKILL_ACTION;
     }
 
     @Override
@@ -74,7 +64,6 @@ public class ContractReviewNode extends LegalBusinessNodeSupport {
 
         return legalSkillExecutionService.buildSkillAwareUserPrompt(
                 skillId(),
-                skillAction(),
                 basePrompt
         );
     }
@@ -100,12 +89,12 @@ public class ContractReviewNode extends LegalBusinessNodeSupport {
         LegalFlowSseUtils.sendExecution(
                 context.getEmitter(),
                 5,
-                "ContractReviewNode(openAiChatClient)：合同审查 Skill 执行完成。",
+                "ContractReviewNode(openAiChatClient)：合同审查 Skill 增强执行完成。",
                 context.getSessionId()
         );
 
-        log.info("ContractReviewNode completed, skillId={}, skillAction={}, draftType={}, answer={}",
-                skillId(), skillAction(), draftResult.getDraftType(), draftResult.getDraftAnswer());
+        log.info("ContractReviewNode completed, skillId={}, draftType={}, answer={}",
+                skillId(), draftResult.getDraftType(), draftResult.getDraftAnswer());
 
         return afterDraft(request, context, draftResult);
     }
